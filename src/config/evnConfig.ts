@@ -13,13 +13,18 @@ if (!fs.existsSync(path.resolve('.env'))) {
 }
 
 const configSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production']).default('development'),
   PORT: z.string(),
   DATABASE_URL: z.string(),
   ACCESS_TOKEN_SECRET: z.string(),
   ACCESS_TOKEN_EXPIRES_IN: z.string(),
   REFRESH_TOKEN_SECRET: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
-  SECRET_API_KEY: z.string()
+  SECRET_API_KEY: z.string(),
+  ADMIN_NAME: z.string(),
+  ADMIN_PASSWORD: z.string(),
+  ADMIN_EMAIL: z.string(),
+  ADMIN_PHONE_NUMBER: z.string()
 })
 
 const configServer = configSchema.safeParse(process.env)
