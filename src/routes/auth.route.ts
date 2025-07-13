@@ -6,6 +6,8 @@ const authRouter = Router()
 
 authRouter.post('/register', wrapRequestHandler(AuthController.register))
 
+authRouter.post('/otp', wrapRequestHandler(AuthController.sendOTP))
+
 authRouter.post('/login', wrapRequestHandler(AuthController.login))
 
 authRouter.post('/refresh-token', wrapRequestHandler(AuthController.refreshToken))

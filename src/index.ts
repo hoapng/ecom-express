@@ -22,6 +22,7 @@ app.use((req: any, res: Response, next: NextFunction) => {
 })
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error('aaaaa', err)
   if (err instanceof z.ZodError) {
     err = createHttpError(422, { message: err.issues })
   }

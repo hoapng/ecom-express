@@ -1,11 +1,15 @@
-import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
+import { generateOTP, isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
 import { HashingService } from './hashing.service'
 import { prismaService } from './prisma.service'
 import { rolesService } from './role.service'
 import createHttpError from 'http-errors'
 import { TokenService } from './token.service'
-import { RegisterBodyType, RegisterResSchema } from '~/models/auth.model'
+import { RegisterBodyType, RegisterResSchema, SendOTPBodyType } from '~/models/auth.model'
 import { AuthRepository } from '~/repositories/auth.repo'
+import { UserRepository } from '~/repositories/user.repo'
+import { addMilliseconds } from 'date-fns'
+import envConfig from '~/config/evnConfig'
+import ms, { StringValue } from 'ms'
 
 export class AuthService {
   static async register(body: RegisterBodyType) {
@@ -22,10 +26,44 @@ export class AuthService {
       })
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw createHttpError.Conflict('Email đã tồn tại')
+        throw createHttpError(422, {
+          message: [
+            {
+              message: 'Email đã tồn tại',
+              path: 'email'
+            }
+          ]
+        })
       }
       throw error
     }
+  }
+
+  static async sendOTP(body: SendOTPBodyType) {
+    // 1. Kiểm tra email đã tồn tại trong database chưa
+    const user = await UserRepository.findUnique({
+      email: body.email
+    })
+    if (user) {
+      throw createHttpError(422, {
+        message: [
+          {
+            message: 'Email đã tồn tại',
+            path: 'email'
+          }
+        ]
+      })
+    }
+    // 2. Tạo mã OTP
+    const code = generateOTP()
+    const verificationCode = AuthRepository.createVerificationCode({
+      email: body.email,
+      code,
+      type: body.type,
+      expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN as StringValue))
+    })
+    // 3. Gửi mã OTP
+    return verificationCode
   }
 
   static async login(body: any) {

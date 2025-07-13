@@ -13,6 +13,14 @@ export class AuthController {
     return next()
   }
 
+  static async sendOTP(req: any, res: Response, next: NextFunction) {
+    const body = req.body
+    const data = await AuthService.sendOTP(body)
+    req.data = data
+    req.statusCode = StatusCodes.CREATED
+    return next()
+  }
+
   static async login(req: any, res: Response, next: NextFunction) {
     const data = await AuthService.login(req.body)
     req.data = data
