@@ -10,10 +10,37 @@ import { UserRepository } from '~/repositories/user.repo'
 import { addMilliseconds } from 'date-fns'
 import envConfig from '~/config/evnConfig'
 import ms, { StringValue } from 'ms'
+import { TypeOfVerificationCode } from '~/constants/auth.constant'
 
 export class AuthService {
   static async register(body: RegisterBodyType) {
     try {
+      const vevificationCode = await AuthRepository.findUniqueVerificationCode({
+        email: body.email,
+        code: body.code,
+        type: TypeOfVerificationCode.REGISTER
+      })
+      if (!vevificationCode) {
+        throw createHttpError(422, {
+          message: [
+            {
+              message: 'Mã OTP không hợp lệ',
+              path: 'code'
+            }
+          ]
+        })
+      }
+      if (vevificationCode.expiresAt < new Date()) {
+        throw createHttpError(422, {
+          message: [
+            {
+              message: 'Mã OTP đã hết hạn',
+              path: 'code'
+            }
+          ]
+        })
+      }
+
       const clientRoleId = await rolesService.getClientRoleId()
       const hashedPassword = await HashingService.hash(body.password)
 

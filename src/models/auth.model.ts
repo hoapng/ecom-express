@@ -1,15 +1,16 @@
-import { UserStatus } from '@prisma/client'
 import { z } from 'zod'
 import { UserSchema } from './user.model'
 import { TypeOfVerificationCode } from '~/constants/auth.constant'
 
-export const RegisterBodySchema = z
-  .object({
-    email: z.string().email(),
+export const RegisterBodySchema = UserSchema.pick({
+  email: true,
+  name: true,
+  phoneNumber: true
+})
+  .extend({
     password: z.string().min(6).max(100),
-    name: z.string().min(1).max(100),
     confirmPassword: z.string().min(6).max(100),
-    phoneNumber: z.string().min(9).max(15)
+    code: z.string().length(6)
   })
   .strict()
   .superRefine(({ confirmPassword, password }, ctx) => {
