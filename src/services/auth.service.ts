@@ -4,27 +4,22 @@ import { prismaService } from './prisma.service'
 import { rolesService } from './role.service'
 import createHttpError from 'http-errors'
 import { TokenService } from './token.service'
-import { RegisterBodyDTO, RegisterResSchema } from '~/types/auth.dto'
+import { RegisterBodyType, RegisterResSchema } from '~/models/auth.model'
+import { AuthRepository } from '~/repositories/auth.repo'
 
 export class AuthService {
-  static async register(body: RegisterBodyDTO) {
+  static async register(body: RegisterBodyType) {
     try {
       const clientRoleId = await rolesService.getClientRoleId()
       const hashedPassword = await HashingService.hash(body.password)
-      const user = await prismaService.user.create({
-        data: {
-          email: body.email,
-          password: hashedPassword,
-          name: body.name,
-          phoneNumber: body.phoneNumber,
-          roleId: clientRoleId
-        },
-        omit: {
-          password: true,
-          totpSecret: true
-        }
+
+      return await AuthRepository.createUser({
+        email: body.email,
+        name: body.name,
+        phoneNumber: body.phoneNumber,
+        password: hashedPassword,
+        roleId: clientRoleId
       })
-      return RegisterResSchema.parse(user)
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw createHttpError.Conflict('Email đã tồn tại')

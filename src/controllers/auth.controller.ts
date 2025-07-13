@@ -2,7 +2,7 @@ import { NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
 import { AuthService } from '~/services/auth.service'
-import { RegisterBodySchema } from '~/types/auth.dto'
+import { RegisterBodySchema } from '~/models/auth.model'
 
 export class AuthController {
   static async register(req: any, res: Response, next: NextFunction) {

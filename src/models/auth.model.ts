@@ -18,11 +18,7 @@ export const UserSchema = z.object({
   totpSecret: z.string().nullable().optional()
 })
 
-export const RegisterResSchema = UserSchema.transform((user) => {
-  // Remove sensitive fields
-  const { password, totpSecret, ...safeUser } = user
-  return safeUser
-})
+export type UserType = z.infer<typeof UserSchema>
 
 export const RegisterBodySchema = z
   .object({
@@ -43,6 +39,12 @@ export const RegisterBodySchema = z
     }
   })
 
-export type RegisterBodyDTO = z.infer<typeof RegisterBodySchema>
+export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 
-export type RegisterResDTO = z.output<typeof UserSchema>
+export const RegisterResSchema = UserSchema.transform((user) => {
+  // Remove sensitive fields
+  const { password, totpSecret, ...safeUser } = user
+  return safeUser
+})
+
+export type RegisterResType = z.output<typeof UserSchema>

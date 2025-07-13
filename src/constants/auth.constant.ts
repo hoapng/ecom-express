@@ -16,3 +16,9 @@ export const ConditionGuard = {
 export type ConditionGuardType = (typeof ConditionGuard)[keyof typeof ConditionGuard]
 
 export type AuthTypeDecoratorPayload = { authTypes: AuthTypeType[]; options: { condition: ConditionGuardType } }
+
+export const UserStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  BLOCKED: 'BLOCKED'
+} as const
