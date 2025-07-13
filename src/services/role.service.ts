@@ -1,10 +1,10 @@
 import { RoleName } from '~/constants/role.constant'
 import { prismaService } from '~/services/prisma.service'
 
-class RolesService {
-  private clientRoleId: number | null = null
+export class RolesService {
+  private static clientRoleId: number | null = null
 
-  async getClientRoleId() {
+  static async getClientRoleId() {
     if (this.clientRoleId) {
       return this.clientRoleId
     }
@@ -17,5 +17,3 @@ class RolesService {
     return role.id
   }
 }
-
-export const rolesService = new RolesService()

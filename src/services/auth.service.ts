@@ -1,7 +1,7 @@
 import { generateOTP, isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
 import { HashingService } from './hashing.service'
 import { prismaService } from './prisma.service'
-import { rolesService } from './role.service'
+import { RolesService } from './role.service'
 import createHttpError from 'http-errors'
 import { TokenService } from './token.service'
 import { RegisterBodyType, RegisterResSchema, SendOTPBodyType } from '~/models/auth.model'
@@ -11,6 +11,7 @@ import { addMilliseconds } from 'date-fns'
 import envConfig from '~/config/evnConfig'
 import ms, { StringValue } from 'ms'
 import { TypeOfVerificationCode } from '~/constants/auth.constant'
+import { EmailService } from './email.service'
 
 export class AuthService {
   static async register(body: RegisterBodyType) {
@@ -41,7 +42,7 @@ export class AuthService {
         })
       }
 
-      const clientRoleId = await rolesService.getClientRoleId()
+      const clientRoleId = await RolesService.getClientRoleId()
       const hashedPassword = await HashingService.hash(body.password)
 
       return await AuthRepository.createUser({
@@ -90,7 +91,21 @@ export class AuthService {
       expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN as StringValue))
     })
     // 3. Gửi mã OTP
-    return verificationCode
+    const { error } = await EmailService.sendOTP({
+      email: body.email,
+      code
+    })
+    if (error) {
+      throw createHttpError(422, {
+        message: [
+          {
+            message: 'Gửi mã OTP thất bại',
+            path: 'code'
+          }
+        ]
+      })
+    }
+    return
   }
 
   static async login(body: any) {
