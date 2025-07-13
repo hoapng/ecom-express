@@ -4,9 +4,10 @@ import { prismaService } from './prisma.service'
 import { rolesService } from './role.service'
 import createHttpError from 'http-errors'
 import { TokenService } from './token.service'
+import { RegisterBodyDTO, RegisterResSchema } from '~/types/auth.dto'
 
 export class AuthService {
-  static async register(body: any) {
+  static async register(body: RegisterBodyDTO) {
     try {
       const clientRoleId = await rolesService.getClientRoleId()
       const hashedPassword = await HashingService.hash(body.password)
@@ -23,7 +24,7 @@ export class AuthService {
           totpSecret: true
         }
       })
-      return user
+      return RegisterResSchema.parse(user)
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
         throw createHttpError.Conflict('Email đã tồn tại')
@@ -45,12 +46,14 @@ export class AuthService {
 
     const isPasswordMatch = await HashingService.compare(body.password, user.password)
     if (!isPasswordMatch) {
-      throw createHttpError(422, [
-        {
-          field: 'password',
-          error: 'Password is incorrect'
-        }
-      ])
+      throw createHttpError(422, {
+        message: [
+          {
+            field: 'password',
+            error: 'Password is incorrect'
+          }
+        ]
+      })
     }
     const tokens = await this.generateTokens({ userId: user.id })
     return tokens
