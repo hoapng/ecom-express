@@ -1,24 +1,32 @@
 import { generateOTP, isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
-import { HashingService } from './hashing.service'
+import { hashingService, HashingService } from './hashing.service'
 import { prismaService } from './prisma.service'
-import { RolesService } from './role.service'
+import { rolesService, RolesService } from './role.service'
 import createHttpError from 'http-errors'
-import { TokenService } from './token.service'
+import { tokenService, TokenService } from './token.service'
 import { LoginBodyType, RegisterBodyType, RegisterResSchema, SendOTPBodyType } from '~/models/auth.model'
-import { AuthRepository } from '~/repositories/auth.repo'
-import { UserRepository } from '~/repositories/user.repo'
+import { authRepository, AuthRepository } from '~/repositories/auth.repo'
+import { SharedUserRepository, sharedUserRepository } from '~/repositories/shared-user.repo'
 import { addMilliseconds } from 'date-fns'
 import envConfig from '~/config/evnConfig'
 import ms, { StringValue } from 'ms'
 import { TypeOfVerificationCode } from '~/constants/auth.constant'
-import { EmailService } from './email.service'
+import { emailService, EmailService } from './email.service'
 import { StatusCodes } from 'http-status-codes'
 import { AccessTokenPayloadCreate } from '~/types/jwt.type'
 
 export class AuthService {
-  static async register(body: RegisterBodyType) {
+  constructor(
+    private readonly hashingService: HashingService,
+    private readonly rolesService: RolesService,
+    private readonly authRepository: AuthRepository,
+    private readonly sharedUserRepository: SharedUserRepository,
+    private readonly emailService: EmailService,
+    private readonly tokenService: TokenService
+  ) {}
+  async register(body: RegisterBodyType) {
     try {
-      const vevificationCode = await AuthRepository.findUniqueVerificationCode({
+      const vevificationCode = await this.authRepository.findUniqueVerificationCode({
         email: body.email,
         code: body.code,
         type: TypeOfVerificationCode.REGISTER
@@ -44,10 +52,10 @@ export class AuthService {
         })
       }
 
-      const clientRoleId = await RolesService.getClientRoleId()
-      const hashedPassword = await HashingService.hash(body.password)
+      const clientRoleId = await this.rolesService.getClientRoleId()
+      const hashedPassword = await this.hashingService.hash(body.password)
 
-      return await AuthRepository.createUser({
+      return await this.authRepository.createUser({
         email: body.email,
         name: body.name,
         phoneNumber: body.phoneNumber,
@@ -69,9 +77,9 @@ export class AuthService {
     }
   }
 
-  static async sendOTP(body: SendOTPBodyType) {
+  async sendOTP(body: SendOTPBodyType) {
     // 1. Kiểm tra email đã tồn tại trong database chưa
-    const user = await UserRepository.findUnique({
+    const user = await this.sharedUserRepository.findUnique({
       email: body.email
     })
     if (user) {
@@ -86,14 +94,14 @@ export class AuthService {
     }
     // 2. Tạo mã OTP
     const code = generateOTP()
-    const verificationCode = AuthRepository.createVerificationCode({
+    const verificationCode = this.authRepository.createVerificationCode({
       email: body.email,
       code,
       type: body.type,
       expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN as StringValue))
     })
     // 3. Gửi mã OTP
-    const { error } = await EmailService.sendOTP({
+    const { error } = await this.emailService.sendOTP({
       email: body.email,
       code
     })
@@ -110,8 +118,8 @@ export class AuthService {
     return verificationCode
   }
 
-  static async login(body: LoginBodyType & { userAgent: string; ip: string }) {
-    const user = await AuthRepository.findUniqueUserIncludeRole({
+  async login(body: LoginBodyType & { userAgent: string; ip: string }) {
+    const user = await this.authRepository.findUniqueUserIncludeRole({
       email: body.email
     })
 
@@ -124,7 +132,7 @@ export class AuthService {
       ])
     }
 
-    const isPasswordMatch = await HashingService.compare(body.password, user.password)
+    const isPasswordMatch = await this.hashingService.compare(body.password, user.password)
     if (!isPasswordMatch) {
       throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: [
@@ -135,7 +143,7 @@ export class AuthService {
         ]
       })
     }
-    const device = await AuthRepository.createDevice({
+    const device = await this.authRepository.createDevice({
       userId: user.id,
       userAgent: body.userAgent,
       ip: body.ip
@@ -149,20 +157,20 @@ export class AuthService {
     return tokens
   }
 
-  static async generateTokens({ userId, deviceId, roleId, roleName }: AccessTokenPayloadCreate) {
+  async generateTokens({ userId, deviceId, roleId, roleName }: AccessTokenPayloadCreate) {
     const [accessToken, refreshToken] = await Promise.all([
-      TokenService.signAccessToken({
+      this.tokenService.signAccessToken({
         userId,
         deviceId,
         roleId,
         roleName
       }),
-      TokenService.signRefreshToken({
+      this.tokenService.signRefreshToken({
         userId
       })
     ])
-    const decodedRefreshToken = await TokenService.verifyRefreshToken(refreshToken)
-    await AuthRepository.createRefreshToken({
+    const decodedRefreshToken = await this.tokenService.verifyRefreshToken(refreshToken)
+    await this.authRepository.createRefreshToken({
       token: refreshToken,
       userId,
       expiresAt: new Date(decodedRefreshToken.exp * 1000),
@@ -171,11 +179,11 @@ export class AuthService {
     return { accessToken, refreshToken }
   }
 
-  static async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string) {
     return
     // try {
     //   // 1. Kiểm tra refreshToken có hợp lệ không
-    //   const { userId } = await TokenService.verifyRefreshToken(refreshToken)
+    //   const { userId } = await this.tokenService.verifyRefreshToken(refreshToken)
     //   // 2. Kiểm tra refreshToken có tồn tại trong database không
     //   await prismaService.refreshToken.findUniqueOrThrow({
     //     where: {
@@ -200,10 +208,10 @@ export class AuthService {
     // }
   }
 
-  static async logout(refreshToken: string) {
+  async logout(refreshToken: string) {
     try {
       // 1. Kiểm tra refreshToken có hợp lệ không
-      await TokenService.verifyRefreshToken(refreshToken)
+      await this.tokenService.verifyRefreshToken(refreshToken)
       // 2. Xóa refreshToken trong database
       await prismaService.refreshToken.delete({
         where: {
@@ -221,3 +229,12 @@ export class AuthService {
     }
   }
 }
+
+export const authService = new AuthService(
+  hashingService,
+  rolesService,
+  authRepository,
+  sharedUserRepository,
+  emailService,
+  tokenService
+)

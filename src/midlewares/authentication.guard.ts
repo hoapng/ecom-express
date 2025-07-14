@@ -2,30 +2,36 @@ import { NextFunction, Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import envConfig from '~/config/evnConfig'
 import { AuthType, AuthTypeType, ConditionGuard, ConditionGuardType, REQUEST_USER_KEY } from '~/constants/auth.constant'
-import { TokenService } from '~/services/token.service'
+import { tokenService, TokenService } from '~/services/token.service'
 
-export const authenticationGuard =
-  (
-    authTypes: AuthTypeType[] = [AuthType.None],
-    options: { condition: ConditionGuardType } = { condition: ConditionGuard.And }
-  ) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    const xAPIKey = req.headers['x-api-key']
-    const accessToken = req.headers.authorization?.split(' ')[1]
+export class AccessTokenGuard {
+  constructor(private readonly tokenService: TokenService) {}
 
-    if (options.condition === ConditionGuard.Or && (xAPIKey === envConfig.SECRET_API_KEY || accessToken)) {
-      if (accessToken) {
-        const decodedAccessToken = TokenService.verifyAccessToken(accessToken)
-        req[REQUEST_USER_KEY] = decodedAccessToken
+  canActivate =
+    (
+      authTypes: AuthTypeType[] = [AuthType.None],
+      options: { condition: ConditionGuardType } = { condition: ConditionGuard.And }
+    ) =>
+    (req: Request, res: Response, next: NextFunction) => {
+      const xAPIKey = req.headers['x-api-key']
+      const accessToken = req.headers.authorization?.split(' ')[1]
+
+      if (options.condition === ConditionGuard.Or && (xAPIKey === envConfig.SECRET_API_KEY || accessToken)) {
+        if (accessToken) {
+          const decodedAccessToken = this.tokenService.verifyAccessToken(accessToken)
+          req[REQUEST_USER_KEY] = decodedAccessToken
+        }
+        return next()
       }
-      return next()
-    }
 
-    if (options.condition === ConditionGuard.And && xAPIKey === envConfig.SECRET_API_KEY && accessToken) {
-      const decodedAccessToken = TokenService.verifyAccessToken(accessToken)
-      req[REQUEST_USER_KEY] = decodedAccessToken
-      return next()
-    }
+      if (options.condition === ConditionGuard.And && xAPIKey === envConfig.SECRET_API_KEY && accessToken) {
+        const decodedAccessToken = this.tokenService.verifyAccessToken(accessToken)
+        req[REQUEST_USER_KEY] = decodedAccessToken
+        return next()
+      }
 
-    return next(createHttpError.Unauthorized())
-  }
+      return next(createHttpError.Unauthorized())
+    }
+}
+
+export const authenticationGuard = new AccessTokenGuard(tokenService).canActivate

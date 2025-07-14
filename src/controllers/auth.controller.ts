@@ -1,26 +1,28 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { AuthService } from '~/services/auth.service'
+import { authService, AuthService } from '~/services/auth.service'
 import { RegisterBodySchema } from '~/models/auth.model'
 
 export class AuthController {
-  static async register(req: Request, res: Response, next: NextFunction) {
+  constructor(private readonly authService: AuthService) {}
+
+  async register(req: Request, res: Response, next: NextFunction) {
     const body = RegisterBodySchema.parse(req.body) // Validate request body
-    const data = await AuthService.register(body)
+    const data = await this.authService.register(body)
     req.data = data
     req.statusCode = StatusCodes.CREATED
     return next()
   }
 
-  static async sendOTP(req: Request, res: Response, next: NextFunction) {
-    const data = await AuthService.sendOTP(req.body)
+  async sendOTP(req: Request, res: Response, next: NextFunction) {
+    const data = await this.authService.sendOTP(req.body)
     req.data = data
     req.statusCode = StatusCodes.CREATED
     return next()
   }
 
-  static async login(req: Request, res: Response, next: NextFunction) {
-    const data = await AuthService.login({
+  async login(req: Request, res: Response, next: NextFunction) {
+    const data = await this.authService.login({
       ...req.body,
       userAgent: req.headers['user-agent'],
       ip: req.clientIp
@@ -30,17 +32,19 @@ export class AuthController {
     return next()
   }
 
-  static async refreshToken(req: any, res: Response, next: NextFunction) {
-    const data = await AuthService.refreshToken(req.body.refreshToken)
+  async refreshToken(req: any, res: Response, next: NextFunction) {
+    const data = await this.authService.refreshToken(req.body.refreshToken)
     req.data = data
     req.statusCode = StatusCodes.OK
     return next()
   }
 
-  static async logout(req: any, res: Response, next: NextFunction) {
-    const data = await AuthService.logout(req.body.refreshToken)
+  async logout(req: any, res: Response, next: NextFunction) {
+    const data = await this.authService.logout(req.body.refreshToken)
     req.data = data
     req.statusCode = StatusCodes.CREATED
     return next()
   }
 }
+
+export const authController = new AuthController(authService)

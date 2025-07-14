@@ -1,17 +1,32 @@
 import { Router } from 'express'
-import { AuthController } from '~/controllers/auth.controller'
+import { authController } from '~/controllers/auth.controller'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
 
 const authRouter = Router()
 
-authRouter.post('/register', wrapRequestHandler(AuthController.register))
+authRouter.post(
+  '/register',
+  wrapRequestHandler((req, res, next) => authController.register(req, res, next))
+)
 
-authRouter.post('/otp', wrapRequestHandler(AuthController.sendOTP))
+authRouter.post(
+  '/otp',
+  wrapRequestHandler((req, res, next) => authController.sendOTP(req, res, next))
+)
 
-authRouter.post('/login', wrapRequestHandler(AuthController.login))
+authRouter.post(
+  '/login',
+  wrapRequestHandler((req, res, next) => authController.login(req, res, next))
+)
 
-authRouter.post('/refresh-token', wrapRequestHandler(AuthController.refreshToken))
+authRouter.post(
+  '/refresh-token',
+  wrapRequestHandler((req, res, next) => authController.refreshToken(req, res, next))
+)
 
-authRouter.post('/logout', wrapRequestHandler(AuthController.logout))
+authRouter.post(
+  '/logout',
+  wrapRequestHandler((req, res, next) => authController.logout(req, res, next))
+)
 
 export default authRouter

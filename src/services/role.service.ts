@@ -1,14 +1,16 @@
 import { RoleName } from '~/constants/role.constant'
-import { prismaService } from '~/services/prisma.service'
+import { PrismaService, prismaService } from '~/services/prisma.service'
 
 export class RolesService {
-  private static clientRoleId: number | null = null
+  private clientRoleId: number | null = null
 
-  static async getClientRoleId() {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  async getClientRoleId() {
     if (this.clientRoleId) {
       return this.clientRoleId
     }
-    const role = await prismaService.role.findUniqueOrThrow({
+    const role = await this.prismaService.role.findUniqueOrThrow({
       where: {
         name: RoleName.Client
       }
@@ -17,3 +19,5 @@ export class RolesService {
     return role.id
   }
 }
+
+export const rolesService = new RolesService(prismaService)

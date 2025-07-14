@@ -4,9 +4,9 @@ import * as React from 'react'
 import { OTPEmail } from '~/view/otp'
 
 export class EmailService {
-  private static resend = new Resend(envConfig.RESEND_API_KEY)
+  private resend = new Resend(envConfig.RESEND_API_KEY)
 
-  static sendOTP(payload: { email: string; code: string }) {
+  sendOTP(payload: { email: string; code: string }) {
     const subject = 'Mã OTP'
     return this.resend.emails.send({
       from: 'Ecommerce <onboarding@resend.dev>',
@@ -16,3 +16,5 @@ export class EmailService {
     })
   }
 }
+
+export const emailService = new EmailService()
