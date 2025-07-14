@@ -12,6 +12,7 @@ import envConfig from '~/config/evnConfig'
 import ms, { StringValue } from 'ms'
 import { TypeOfVerificationCode } from '~/constants/auth.constant'
 import { EmailService } from './email.service'
+import { StatusCodes } from 'http-status-codes'
 
 export class AuthService {
   static async register(body: RegisterBodyType) {
@@ -22,7 +23,7 @@ export class AuthService {
         type: TypeOfVerificationCode.REGISTER
       })
       if (!vevificationCode) {
-        throw createHttpError(422, {
+        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
           message: [
             {
               message: 'Mã OTP không hợp lệ',
@@ -32,7 +33,7 @@ export class AuthService {
         })
       }
       if (vevificationCode.expiresAt < new Date()) {
-        throw createHttpError(422, {
+        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
           message: [
             {
               message: 'Mã OTP đã hết hạn',
@@ -54,7 +55,7 @@ export class AuthService {
       })
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw createHttpError(422, {
+        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
           message: [
             {
               message: 'Email đã tồn tại',
@@ -73,7 +74,7 @@ export class AuthService {
       email: body.email
     })
     if (user) {
-      throw createHttpError(422, {
+      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: [
           {
             message: 'Email đã tồn tại',
@@ -96,7 +97,7 @@ export class AuthService {
       code
     })
     if (error) {
-      throw createHttpError(422, {
+      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: [
           {
             message: 'Gửi mã OTP thất bại',
@@ -121,7 +122,7 @@ export class AuthService {
 
     const isPasswordMatch = await HashingService.compare(body.password, user.password)
     if (!isPasswordMatch) {
-      throw createHttpError(422, {
+      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         message: [
           {
             field: 'password',

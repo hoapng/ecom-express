@@ -9,6 +9,7 @@ import { initialScript } from './config/initialScript'
 import { logger } from './config/logger'
 import z from 'zod'
 import createHttpError from 'http-errors'
+import { StatusCodes } from 'http-status-codes'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -23,7 +24,7 @@ app.use((req: any, res: Response, next: NextFunction) => {
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof z.ZodError) {
-    err = createHttpError(422, { message: err.issues })
+    err = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, { message: err.issues })
   }
   res.status(+err.status || 500).json({
     statusCode: err.status || 500,
