@@ -1,13 +1,13 @@
 import { StatusCodes } from 'http-status-codes'
-import { TokenPayload } from './types/jwt.type'
 import { REQUEST_USER_KEY } from './constants/auth.constant'
+import { AccessTokenPayload } from './types/jwt.type'
 
 declare global {
   namespace Express {
     interface Request {
       data?: any
       statusCode?: StatusCodes
-      [REQUEST_USER_KEY]?: TokenPayload
+      [REQUEST_USER_KEY]?: AccessTokenPayload
       [key: string]: any // Allow additional properties
     }
   }

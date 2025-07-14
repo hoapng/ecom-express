@@ -10,9 +10,12 @@ import { logger } from './config/logger'
 import z from 'zod'
 import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
+import requestIp from 'request-ip'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
+
+app.use(requestIp.mw())
 
 app.use(express.json())
 
