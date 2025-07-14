@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { authService, AuthService } from '~/services/auth.service'
-import { RegisterBodySchema } from '~/models/auth.model'
+import { LoginResSchema, RefreshTokenResSchema, RegisterBodySchema, RegisterResSchema } from '~/models/auth.model'
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -9,7 +9,7 @@ export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
     const body = RegisterBodySchema.parse(req.body) // Validate request body
     const data = await this.authService.register(body)
-    req.data = data
+    req.data = RegisterResSchema.parse(data)
     req.statusCode = StatusCodes.CREATED
     return next()
   }
@@ -27,21 +27,25 @@ export class AuthController {
       userAgent: req.headers['user-agent'],
       ip: req.clientIp
     })
-    req.data = data
+    req.data = LoginResSchema.parse(data)
     req.statusCode = StatusCodes.CREATED
     return next()
   }
 
-  async refreshToken(req: any, res: Response, next: NextFunction) {
-    const data = await this.authService.refreshToken(req.body.refreshToken)
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
+    const data = await this.authService.refreshToken({
+      ...req.body,
+      userAgent: req.headers['user-agent'],
+      ip: req.clientIp
+    })
     req.data = data
     req.statusCode = StatusCodes.OK
     return next()
   }
 
-  async logout(req: any, res: Response, next: NextFunction) {
+  async logout(req: Request, res: Response, next: NextFunction) {
     const data = await this.authService.logout(req.body.refreshToken)
-    req.data = data
+    req.data = RefreshTokenResSchema.parse(data)
     req.statusCode = StatusCodes.CREATED
     return next()
   }
