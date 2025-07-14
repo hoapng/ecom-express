@@ -1,4 +1,4 @@
-import { NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import envConfig from '~/config/evnConfig'
 import { AuthType, AuthTypeType, ConditionGuard, ConditionGuardType, REQUEST_USER_KEY } from '~/constants/auth.constant'
@@ -9,7 +9,7 @@ export const authenticationGuard =
     authTypes: AuthTypeType[] = [AuthType.None],
     options: { condition: ConditionGuardType } = { condition: ConditionGuard.And }
   ) =>
-  (req: any, res: Response, next: NextFunction) => {
+  (req: Request, res: Response, next: NextFunction) => {
     const xAPIKey = req.headers['x-api-key']
     const accessToken = req.headers.authorization?.split(' ')[1]
 

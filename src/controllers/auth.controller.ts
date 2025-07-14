@@ -1,11 +1,11 @@
-import { NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
 import { AuthService } from '~/services/auth.service'
 import { RegisterBodySchema } from '~/models/auth.model'
 
 export class AuthController {
-  static async register(req: any, res: Response, next: NextFunction) {
+  static async register(req: Request, res: Response, next: NextFunction) {
     const body = RegisterBodySchema.parse(req.body) // Validate request body
     const data = await AuthService.register(body)
     req.data = data
@@ -13,7 +13,7 @@ export class AuthController {
     return next()
   }
 
-  static async sendOTP(req: any, res: Response, next: NextFunction) {
+  static async sendOTP(req: Request, res: Response, next: NextFunction) {
     const body = req.body
     const data = await AuthService.sendOTP(body)
     req.data = data

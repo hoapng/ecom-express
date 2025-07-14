@@ -1,9 +1,9 @@
-import { NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
 import { TokenService } from '~/services/token.service'
 
-export const accessTokenGuard = (req: any, res: Response, next: NextFunction) => {
+export const accessTokenGuard = (req: Request, res: Response, next: NextFunction) => {
   const accessToken = req.headers.authorization?.split(' ')[1]
   if (!accessToken) {
     return next(createHttpError.Unauthorized())
