@@ -105,7 +105,7 @@ export class AuthService {
         ]
       })
     }
-    return
+    return verificationCode
   }
 
   static async login(body: any) {

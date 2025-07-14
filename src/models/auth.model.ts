@@ -31,7 +31,7 @@ export const RegisterResSchema = UserSchema.transform((user) => {
   return safeUser
 })
 
-export type RegisterResType = z.output<typeof UserSchema>
+export type RegisterResType = z.infer<typeof RegisterResSchema>
 
 export const VerificationCode = z.object({
   id: z.number(),
