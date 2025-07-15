@@ -1,11 +1,21 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { authService, AuthService } from '~/services/auth.service'
-import { LoginResSchema, RefreshTokenResSchema, RegisterBodySchema, RegisterResSchema } from '~/models/auth.model'
+import {
+  GetAuthorizationUrlResSchema,
+  LoginResSchema,
+  RefreshTokenResSchema,
+  RegisterBodySchema,
+  RegisterResSchema
+} from '~/models/auth.model'
 import { MessageResSchema } from '~/models/response.model'
+import { googleService, GoogleService } from '~/services/google.service'
 
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleService: GoogleService
+  ) {}
 
   async register(req: Request, res: Response, next: NextFunction) {
     const body = RegisterBodySchema.parse(req.body) // Validate request body
@@ -50,6 +60,17 @@ export class AuthController {
     req.statusCode = StatusCodes.CREATED
     return next()
   }
+
+  getAuthorizationUrl(req: Request, res: Response, next: NextFunction) {
+    const data = this.googleService.getAuthorizationUrl({
+      userAgent: req.headers['user-agent'] as string,
+      ip: req.clientIp as string
+    })
+    req.data = GetAuthorizationUrlResSchema.parse(data)
+    req.statusCode = StatusCodes.CREATED
+    next()
+    return Promise.resolve()
+  }
 }
 
-export const authController = new AuthController(authService)
+export const authController = new AuthController(authService, googleService)

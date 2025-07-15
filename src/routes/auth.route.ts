@@ -33,4 +33,9 @@ authRouter.post(
   wrapRequestHandler((req, res, next) => authController.logout(req, res, next))
 )
 
+authRouter.get(
+  '/google-link',
+  wrapRequestHandler((req, res, next) => authController.getAuthorizationUrl(req, res, next))
+)
+
 export default authRouter
