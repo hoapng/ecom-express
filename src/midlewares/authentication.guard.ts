@@ -51,11 +51,18 @@ export class AuthenticationGuard {
     }
   }
 
-  auth(authTypes: AuthTypeType[], options: { condition: ConditionGuardType } = { condition: ConditionGuard.And }) {
-    return (req: Request, res: Response, next: NextFunction) => {
+  auth(
+    authTypes: AuthTypeType[] = [AuthType.Bearer],
+    options: { condition: ConditionGuardType } = { condition: ConditionGuard.And }
+  ) {
+    return async (req: Request, res: Response, next: NextFunction) => {
       req.authTypes = authTypes
       req.options = options
-      return this.canActivate(req, res, next)
+      const isPublic = await this.canActivate(req, res, next)
+      if (!isPublic) {
+        return next(createHttpError.Unauthorized())
+      }
+      return next()
     }
   }
 }

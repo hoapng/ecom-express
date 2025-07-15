@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import { authController } from '~/controllers/auth.controller'
+import { auth } from '~/midlewares/authentication.guard'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
 
 const authRouter = Router()
 
 authRouter.post(
   '/register',
+
   wrapRequestHandler((req, res, next) => authController.register(req, res, next))
 )
 
@@ -21,11 +23,13 @@ authRouter.post(
 
 authRouter.post(
   '/refresh-token',
+  auth(),
   wrapRequestHandler((req, res, next) => authController.refreshToken(req, res, next))
 )
 
 authRouter.post(
   '/logout',
+  auth(),
   wrapRequestHandler((req, res, next) => authController.logout(req, res, next))
 )
 
