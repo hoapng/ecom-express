@@ -6,14 +6,15 @@ import { tokenService, TokenService } from '~/services/token.service'
 export class AccessTokenGuard {
   constructor(private readonly tokenService: TokenService) {}
 
-  canActivate = (req: Request, res: Response, next: NextFunction) => {
+  canActivate(req: Request, res: Response, next: NextFunction): boolean {
     const accessToken = req.headers.authorization?.split(' ')[1]
     if (!accessToken) {
-      return next(createHttpError.Unauthorized())
+      throw createHttpError.Unauthorized()
     }
     const decodedAccessToken = this.tokenService.verifyAccessToken(accessToken)
     req[REQUEST_USER_KEY] = decodedAccessToken
+    return true
   }
 }
 
-export const accessTokenGuard = new AccessTokenGuard(tokenService).canActivate
+export const accessTokenGuard = new AccessTokenGuard(tokenService)
