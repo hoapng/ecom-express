@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { authService, AuthService } from '~/services/auth.service'
 import { LoginResSchema, RefreshTokenResSchema, RegisterBodySchema, RegisterResSchema } from '~/models/auth.model'
+import { MessageResSchema } from '~/models/response.model'
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -38,14 +39,14 @@ export class AuthController {
       userAgent: req.headers['user-agent'],
       ip: req.clientIp
     })
-    req.data = data
+    req.data = RefreshTokenResSchema.parse(data)
     req.statusCode = StatusCodes.OK
     return next()
   }
 
   async logout(req: Request, res: Response, next: NextFunction) {
     const data = await this.authService.logout(req.body.refreshToken)
-    req.data = RefreshTokenResSchema.parse(data)
+    req.data = MessageResSchema.parse(data)
     req.statusCode = StatusCodes.CREATED
     return next()
   }

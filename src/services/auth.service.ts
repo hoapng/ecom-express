@@ -230,17 +230,19 @@ export class AuthService {
       // 1. Kiểm tra refreshToken có hợp lệ không
       await this.tokenService.verifyRefreshToken(refreshToken)
       // 2. Xóa refreshToken trong database
-      await prismaService.refreshToken.delete({
-        where: {
-          token: refreshToken
-        }
+      const deletedRefreshToken = await this.authRepository.deleteRefreshToken({
+        token: refreshToken
       })
-      return { message: 'Logout successfully' }
+      // 3. Cập nhật device là đã logout
+      await this.authRepository.updateDevice(deletedRefreshToken.deviceId, {
+        isActive: false
+      })
+      return { message: 'Đăng xuất thành công' }
     } catch (error) {
       // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
       // refresh token của họ đã bị đánh cắp
       if (isNotFoundPrismaError(error)) {
-        throw createHttpError.Unauthorized('Refresh token has been revoked')
+        throw createHttpError.Unauthorized('Refresh Token đã được sử dụng')
       }
       throw createHttpError.Unauthorized()
     }
