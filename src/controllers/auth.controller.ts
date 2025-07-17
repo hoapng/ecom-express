@@ -89,6 +89,13 @@ export class AuthController {
       return res.redirect(`${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?errorMessage=${message}`)
     }
   }
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    const data = await this.authService.forgotPassword(req.body)
+    req.data = MessageResSchema.parse(data)
+    req.statusCode = StatusCodes.CREATED
+    return next()
+  }
 }
 
 export const authController = new AuthController(authService, googleService)

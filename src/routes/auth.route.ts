@@ -43,4 +43,9 @@ authRouter.get(
   wrapRequestHandler((req, res, next) => authController.googleCallback(req, res, next))
 )
 
+authRouter.post(
+  '/forgot-password',
+  wrapRequestHandler((req, res, next) => authController.forgotPassword(req, res, next))
+)
+
 export default authRouter
