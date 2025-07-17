@@ -10,6 +10,7 @@ import {
 } from '~/models/auth.model'
 import { MessageResSchema } from '~/models/response.model'
 import { googleService, GoogleService } from '~/services/google.service'
+import envConfig from '~/config/evnConfig'
 
 export class AuthController {
   constructor(
@@ -18,8 +19,7 @@ export class AuthController {
   ) {}
 
   async register(req: Request, res: Response, next: NextFunction) {
-    const body = RegisterBodySchema.parse(req.body) // Validate request body
-    const data = await this.authService.register(body)
+    const data = await this.authService.register(req.body)
     req.data = RegisterResSchema.parse(data)
     req.statusCode = StatusCodes.CREATED
     return next()
@@ -70,6 +70,24 @@ export class AuthController {
     req.statusCode = StatusCodes.CREATED
     next()
     return Promise.resolve()
+  }
+
+  async googleCallback(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await this.googleService.googleCallback({
+        code: req.query.code as string,
+        state: req.query.state as string
+      })
+      return res.redirect(
+        `${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?accessToken=${data.accessToken}&refreshToken=${data.refreshToken}`
+      )
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Đã xảy ra lỗi khi đăng nhập bằng Google, vui lòng thử lại bằng cách khác'
+      return res.redirect(`${envConfig.GOOGLE_CLIENT_REDIRECT_URI}?errorMessage=${message}`)
+    }
   }
 }
 

@@ -1,8 +1,4 @@
 import express, { NextFunction, Request, Response } from 'express'
-
-import { prismaService } from './services/prisma.service'
-import { RoleName } from './constants/role.constant'
-import { HashingService } from './services/hashing.service'
 import envConfig from './config/evnConfig'
 import authRouter from './routes/auth.route'
 import { initialScript } from './config/initialScript'
@@ -11,10 +7,12 @@ import z from 'zod'
 import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
 import requestIp from 'request-ip'
-import { auth } from './midlewares/authentication.guard'
+import cors from 'cors'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
+
+app.use(cors())
 
 app.use(requestIp.mw(), express.json())
 

@@ -5,10 +5,10 @@ import { TypeOfVerificationCode } from '~/constants/auth.constant'
 export const RegisterBodySchema = UserSchema.pick({
   email: true,
   name: true,
+  password: true,
   phoneNumber: true
 })
   .extend({
-    password: z.string().min(6).max(100),
     confirmPassword: z.string().min(6).max(100),
     code: z.string().length(6)
   })
@@ -25,10 +25,9 @@ export const RegisterBodySchema = UserSchema.pick({
 
 export type RegisterBodyType = z.infer<typeof RegisterBodySchema>
 
-export const RegisterResSchema = UserSchema.transform((user) => {
-  // Remove sensitive fields
-  const { password, totpSecret, ...safeUser } = user
-  return safeUser
+export const RegisterResSchema = UserSchema.omit({
+  password: true,
+  totpSecret: true
 })
 
 export type RegisterResType = z.infer<typeof RegisterResSchema>

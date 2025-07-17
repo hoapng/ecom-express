@@ -38,4 +38,9 @@ authRouter.get(
   wrapRequestHandler((req, res, next) => authController.getAuthorizationUrl(req, res, next))
 )
 
+authRouter.get(
+  '/google/callback',
+  wrapRequestHandler((req, res, next) => authController.googleCallback(req, res, next))
+)
+
 export default authRouter

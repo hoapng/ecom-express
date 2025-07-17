@@ -17,11 +17,11 @@ export class AuthRepository {
     user: Omit<RegisterBodyType, 'confirmPassword' | 'code'> & Pick<UserType, 'roleId'>
   ): Promise<Omit<UserType, 'password' | 'totpSecret'>> {
     return this.prismaService.user.create({
-      data: user
-      // omit: {
-      //   password: true,
-      //   totpSecret: true
-      // }
+      data: user,
+      omit: {
+        password: true,
+        totpSecret: true
+      }
     })
   }
 
@@ -107,6 +107,17 @@ export class AuthRepository {
   deleteRefreshToken(uniqueObject: { token: string }): Promise<RefreshTokenType> {
     return this.prismaService.refreshToken.delete({
       where: uniqueObject
+    })
+  }
+
+  async createUserInclueRole(
+    user: Pick<UserType, 'email' | 'name' | 'password' | 'phoneNumber' | 'avatar' | 'roleId'>
+  ): Promise<UserType & { role: RoleType }> {
+    return this.prismaService.user.create({
+      data: user,
+      include: {
+        role: true
+      }
     })
   }
 }
