@@ -20,6 +20,16 @@ import { TypeOfVerificationCode } from '~/constants/auth.constant'
 import { emailService, EmailService } from './email.service'
 import { StatusCodes } from 'http-status-codes'
 import { AccessTokenPayloadCreate } from '~/types/jwt.type'
+import {
+  EmailAlreadyExistsException,
+  EmailNotFoundException,
+  FailedToSendOTPException,
+  InvalidOTPException,
+  InvalidPasswordException,
+  OTPExpiredException,
+  RefreshTokenAlreadyUsedException,
+  UnauthorizedAccessException
+} from '~/constants/error'
 
 export class AuthService {
   constructor(
@@ -38,24 +48,10 @@ export class AuthService {
         type: TypeOfVerificationCode.REGISTER
       })
       if (!vevificationCode) {
-        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-          message: [
-            {
-              message: 'Mã OTP không hợp lệ',
-              path: 'code'
-            }
-          ]
-        })
+        throw InvalidOTPException
       }
       if (vevificationCode.expiresAt < new Date()) {
-        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-          message: [
-            {
-              message: 'Mã OTP đã hết hạn',
-              path: 'code'
-            }
-          ]
-        })
+        throw OTPExpiredException
       }
 
       const clientRoleId = await this.rolesService.getClientRoleId()
@@ -70,14 +66,7 @@ export class AuthService {
       })
     } catch (error) {
       if (isUniqueConstraintPrismaError(error)) {
-        throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-          message: [
-            {
-              message: 'Email đã tồn tại',
-              path: 'email'
-            }
-          ]
-        })
+        throw EmailAlreadyExistsException
       }
       throw error
     }
@@ -89,14 +78,7 @@ export class AuthService {
       email: body.email
     })
     if (user) {
-      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: [
-          {
-            message: 'Email đã tồn tại',
-            path: 'email'
-          }
-        ]
-      })
+      throw EmailAlreadyExistsException
     }
     // 2. Tạo mã OTP
     const code = generateOTP()
@@ -112,14 +94,7 @@ export class AuthService {
       code
     })
     if (error) {
-      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: [
-          {
-            message: 'Gửi mã OTP thất bại',
-            path: 'code'
-          }
-        ]
-      })
+      throw FailedToSendOTPException
     }
     return verificationCode
     return { message: 'Gửi mã OTP thành công' }
@@ -131,26 +106,12 @@ export class AuthService {
     })
 
     if (!user) {
-      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: [
-          {
-            message: 'Email không tồn tại',
-            path: 'email'
-          }
-        ]
-      })
+      throw EmailNotFoundException
     }
 
     const isPasswordMatch = await this.hashingService.compare(body.password, user.password)
     if (!isPasswordMatch) {
-      throw createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        message: [
-          {
-            path: 'password',
-            error: 'Mật khẩu không đúng'
-          }
-        ]
-      })
+      throw InvalidPasswordException
     }
     const device = await this.authRepository.createDevice({
       userId: user.id,
@@ -199,7 +160,7 @@ export class AuthService {
       if (!refreshTokenInDb) {
         // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
         // refresh token của họ đã bị đánh cắp
-        throw createHttpError.Unauthorized('Refresh Token đã được sử dụng')
+        throw RefreshTokenAlreadyUsedException
       }
       const {
         deviceId,
@@ -222,7 +183,7 @@ export class AuthService {
       if (createHttpError.isHttpError(error)) {
         throw error
       }
-      throw createHttpError.Unauthorized()
+      throw UnauthorizedAccessException
     }
   }
 
@@ -243,9 +204,9 @@ export class AuthService {
       // Trường hợp đã refresh token rồi, hãy thông báo cho user biết
       // refresh token của họ đã bị đánh cắp
       if (isNotFoundPrismaError(error)) {
-        throw createHttpError.Unauthorized('Refresh Token đã được sử dụng')
+        throw RefreshTokenAlreadyUsedException
       }
-      throw createHttpError.Unauthorized()
+      throw UnauthorizedAccessException
     }
   }
 }
