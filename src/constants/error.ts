@@ -95,3 +95,12 @@ export const InvalidTOTPAndCodeException = createHttpError(StatusCodes.UNPROCESS
     }
   ]
 })
+
+export const InvalidTOTPException = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+  message: [
+    {
+      message: 'Error.InvalidTOTP',
+      path: 'totpCode'
+    }
+  ]
+})
