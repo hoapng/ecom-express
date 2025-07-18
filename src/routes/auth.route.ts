@@ -54,4 +54,10 @@ authRouter.post(
   wrapRequestHandler((req, res, next) => authController.setupTwoFactorAuth(req, res, next))
 )
 
+authRouter.post(
+  '/2fa/disable',
+  auth(),
+  wrapRequestHandler((req, res, next) => authController.disableTwoFactorAuth(req, res, next))
+)
+
 export default authRouter

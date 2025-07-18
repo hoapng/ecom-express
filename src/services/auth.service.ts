@@ -5,6 +5,7 @@ import { rolesService, RolesService } from './role.service'
 import createHttpError from 'http-errors'
 import { tokenService, TokenService } from './token.service'
 import {
+  DisableTwoFactorBodyType,
   ForgotPasswordBodyType,
   LoginBodyType,
   RefreshTokenBodyType,
@@ -32,6 +33,7 @@ import {
   OTPExpiredException,
   RefreshTokenAlreadyUsedException,
   TOTPAlreadyEnabledException,
+  TOTPNotEnabledException,
   UnauthorizedAccessException
 } from '~/constants/error'
 import { twoFactorService, TwoFactorService } from './2fa.service'
@@ -338,6 +340,45 @@ export class AuthService {
     return {
       secret,
       uri
+    }
+  }
+
+  async disableTwoFactorAuth(data: DisableTwoFactorBodyType & { userId: number }) {
+    const { userId, totpCode, code } = data
+    // 1. Lấy thông tin user, kiểm tra xem user có tồn tại hay không, và xem họ đã bật 2FA chưa
+    const user = await this.sharedUserRepository.findUnique({ id: userId })
+    if (!user) {
+      throw EmailNotFoundException
+    }
+    if (!user.totpSecret) {
+      throw TOTPNotEnabledException
+    }
+
+    // 2. Kiểm tra mã TOTP có hợp lệ hay không
+    if (totpCode) {
+      const isValid = this.twoFactorService.verifyTOTP({
+        email: user.email,
+        secret: user.totpSecret,
+        token: totpCode
+      })
+      if (!isValid) {
+        throw InvalidTOTPException
+      }
+    } else if (code) {
+      // 3. Kiểm tra mã OTP email có hợp lệ hay không
+      await this.validateVerificationCode({
+        email: user.email,
+        code,
+        type: TypeOfVerificationCode.DISABLE_2FA
+      })
+    }
+
+    // 4. Cập nhật secret thành null
+    await this.authRepository.updateUser({ id: userId }, { totpSecret: null })
+
+    // 5. Trả về thông báo
+    return {
+      message: 'Tắt 2FA thành công'
     }
   }
 }

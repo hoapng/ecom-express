@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { authService, AuthService } from '~/services/auth.service'
 import {
+  DisableTwoFactorBodySchema,
   ForgotPasswordBodySchema,
   GetAuthorizationUrlResSchema,
   LoginBodySchema,
@@ -34,7 +35,7 @@ export class AuthController {
   async sendOTP(req: Request, res: Response, next: NextFunction) {
     const body = SendOTPBodySchema.parse(req.body)
     const data = await this.authService.sendOTP(body)
-    req.data = SendOTPBodySchema.parse(data)
+    req.data = MessageResSchema.parse(data)
     return next()
   }
 
@@ -107,6 +108,16 @@ export class AuthController {
     EmptyBodySchema.parse(req.body)
     const data = await this.authService.setupTwoFactorAuth(req[REQUEST_USER_KEY]?.userId as number)
     req.data = TwoFactorSetupResSchema.parse(data)
+    return next()
+  }
+
+  async disableTwoFactorAuth(req: Request, res: Response, next: NextFunction) {
+    const body = DisableTwoFactorBodySchema.parse(req.body)
+    const data = await this.authService.disableTwoFactorAuth({
+      ...body,
+      userId: req[REQUEST_USER_KEY]?.userId as number
+    })
+    req.data = MessageResSchema.parse(data)
     return next()
   }
 }
