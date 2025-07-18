@@ -2,15 +2,21 @@ import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { authService, AuthService } from '~/services/auth.service'
 import {
+  ForgotPasswordBodySchema,
   GetAuthorizationUrlResSchema,
+  LoginBodySchema,
   LoginResSchema,
   RefreshTokenResSchema,
   RegisterBodySchema,
-  RegisterResSchema
+  RegisterResSchema,
+  SendOTPBodySchema,
+  TwoFactorSetupResSchema
 } from '~/models/auth.model'
 import { MessageResSchema } from '~/models/response.model'
 import { googleService, GoogleService } from '~/services/google.service'
 import envConfig from '~/config/evnConfig'
+import { REQUEST_USER_KEY } from '~/constants/auth.constant'
+import { EmptyBodySchema } from '~/models/request.model'
 
 export class AuthController {
   constructor(
@@ -19,35 +25,36 @@ export class AuthController {
   ) {}
 
   async register(req: Request, res: Response, next: NextFunction) {
-    const data = await this.authService.register(req.body)
+    const body = RegisterBodySchema.parse(req.body)
+    const data = await this.authService.register(body)
     req.data = RegisterResSchema.parse(data)
-    req.statusCode = StatusCodes.CREATED
     return next()
   }
 
   async sendOTP(req: Request, res: Response, next: NextFunction) {
-    const data = await this.authService.sendOTP(req.body)
-    req.data = data
-    req.statusCode = StatusCodes.CREATED
+    const body = SendOTPBodySchema.parse(req.body)
+    const data = await this.authService.sendOTP(body)
+    req.data = SendOTPBodySchema.parse(data)
     return next()
   }
 
   async login(req: Request, res: Response, next: NextFunction) {
+    const body = LoginBodySchema.parse(req.body)
     const data = await this.authService.login({
-      ...req.body,
-      userAgent: req.headers['user-agent'],
-      ip: req.clientIp
+      ...body,
+      userAgent: req.headers['user-agent'] as string,
+      ip: req.clientIp as string
     })
     req.data = LoginResSchema.parse(data)
-    req.statusCode = StatusCodes.CREATED
     return next()
   }
 
   async refreshToken(req: Request, res: Response, next: NextFunction) {
+    const body = RefreshTokenResSchema.parse(req.body)
     const data = await this.authService.refreshToken({
-      ...req.body,
-      userAgent: req.headers['user-agent'],
-      ip: req.clientIp
+      ...body,
+      userAgent: req.headers['user-agent'] as string,
+      ip: req.clientIp as string
     })
     req.data = RefreshTokenResSchema.parse(data)
     req.statusCode = StatusCodes.OK
@@ -55,9 +62,9 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response, next: NextFunction) {
-    const data = await this.authService.logout(req.body.refreshToken)
+    const body = RefreshTokenResSchema.parse(req.body)
+    const data = await this.authService.logout(body.refreshToken)
     req.data = MessageResSchema.parse(data)
-    req.statusCode = StatusCodes.CREATED
     return next()
   }
 
@@ -67,7 +74,6 @@ export class AuthController {
       ip: req.clientIp as string
     })
     req.data = GetAuthorizationUrlResSchema.parse(data)
-    req.statusCode = StatusCodes.CREATED
     next()
     return Promise.resolve()
   }
@@ -91,9 +97,16 @@ export class AuthController {
   }
 
   async forgotPassword(req: Request, res: Response, next: NextFunction) {
-    const data = await this.authService.forgotPassword(req.body)
+    const body = ForgotPasswordBodySchema.parse(req.body)
+    const data = await this.authService.forgotPassword(body)
     req.data = MessageResSchema.parse(data)
-    req.statusCode = StatusCodes.CREATED
+    return next()
+  }
+
+  async setupTwoFactorAuth(req: Request, res: Response, next: NextFunction) {
+    EmptyBodySchema.parse(req.body)
+    const data = await this.authService.setupTwoFactorAuth(req[REQUEST_USER_KEY]?.userId as number)
+    req.data = TwoFactorSetupResSchema.parse(data)
     return next()
   }
 }

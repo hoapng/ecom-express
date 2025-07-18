@@ -19,7 +19,8 @@ app.use(requestIp.mw(), express.json())
 app.use('/auth', authRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
-  return res.status(+req.statusCode).json({ statusCode: req.statusCode, data: req.data })
+  const statusCode = +req.statusCode || StatusCodes.CREATED
+  return res.status(statusCode).json({ statusCode, data: req.data })
 })
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

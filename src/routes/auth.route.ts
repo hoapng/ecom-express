@@ -48,4 +48,10 @@ authRouter.post(
   wrapRequestHandler((req, res, next) => authController.forgotPassword(req, res, next))
 )
 
+authRouter.post(
+  '/2fa/setup',
+  auth(),
+  wrapRequestHandler((req, res, next) => authController.setupTwoFactorAuth(req, res, next))
+)
+
 export default authRouter

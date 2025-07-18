@@ -64,3 +64,34 @@ export const UnauthorizedAccessException = createHttpError.Unauthorized('Error.U
 
 // Google auth related errors
 export const GoogleUserInfoError = new Error('Error.FailedToGetGoogleUserInfo')
+
+export const TOTPAlreadyEnabledException = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+  message: [
+    {
+      message: 'Error.TOTPAlreadyEnabled',
+      path: 'totpCode'
+    }
+  ]
+})
+
+export const TOTPNotEnabledException = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+  message: [
+    {
+      message: 'Error.TOTPNotEnabled',
+      path: 'totpCode'
+    }
+  ]
+})
+
+export const InvalidTOTPAndCodeException = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+  message: [
+    {
+      message: 'Error.InvalidTOTPAndCode',
+      path: 'totpCode'
+    },
+    {
+      message: 'Error.InvalidTOTPAndCode',
+      path: 'code'
+    }
+  ]
+})
