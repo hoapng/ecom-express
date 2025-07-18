@@ -30,12 +30,13 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof z.ZodError) {
     err = createHttpError(StatusCodes.UNPROCESSABLE_ENTITY, { message: err.issues })
   }
-  res.status(+err.status || 500).json({
+  logger.error({ ...err })
+  console.error(err)
+  return res.status(+err.status || 500).json({
     statusCode: err.status || 500,
     message: err.message,
     error: err.name || 'Error'
   })
-  return logger.error(err)
 })
 
 app.listen(PORT, () => {
