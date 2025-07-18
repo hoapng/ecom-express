@@ -35,7 +35,7 @@ import {
   TOTPAlreadyEnabledException,
   TOTPNotEnabledException,
   UnauthorizedAccessException
-} from '~/constants/error'
+} from '~/errors/auth.error'
 import { twoFactorService, TwoFactorService } from './2fa.service'
 
 export class AuthService {

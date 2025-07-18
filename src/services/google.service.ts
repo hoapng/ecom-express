@@ -7,7 +7,7 @@ import { hashingService, HashingService } from './hashing.service'
 import { rolesService, RolesService } from './role.service'
 import { authService, AuthService } from './auth.service'
 import { v4 as uuidv4 } from 'uuid'
-import { GoogleUserInfoError } from '~/constants/error'
+import { GoogleUserInfoError } from '~/errors/auth.error'
 
 export class GoogleService {
   private oauth2Client: OAuth2Client

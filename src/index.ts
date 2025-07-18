@@ -8,6 +8,7 @@ import createHttpError from 'http-errors'
 import { StatusCodes } from 'http-status-codes'
 import requestIp from 'request-ip'
 import cors from 'cors'
+import languageRouter from './routes/language.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -17,6 +18,8 @@ app.use(cors())
 app.use(requestIp.mw(), express.json())
 
 app.use('/auth', authRouter)
+
+app.use('/languages', languageRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

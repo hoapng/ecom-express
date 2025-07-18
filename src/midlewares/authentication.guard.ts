@@ -44,7 +44,7 @@ export class AuthenticationGuard {
           return false
         })
         if (!canActivate) {
-          throw new createHttpError.Unauthorized()
+          throw createHttpError.Unauthorized()
         }
       }
       return true
