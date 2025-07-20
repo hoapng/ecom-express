@@ -1,3 +1,4 @@
+import createHttpError from 'http-errors'
 import { RoleName } from '~/constants/role.constant'
 import { NotFoundRecordException } from '~/errors/error'
 import { RoleAlreadyExistsException } from '~/errors/role.error'
@@ -73,6 +74,9 @@ export class RoleService {
       }
       if (isUniqueConstraintPrismaError(error)) {
         throw RoleAlreadyExistsException
+      }
+      if (error instanceof Error) {
+        throw createHttpError.BadRequest(error.message)
       }
       throw error
     }
