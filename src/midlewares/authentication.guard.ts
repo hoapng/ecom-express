@@ -1,16 +1,24 @@
 import { NextFunction, Request, Response } from 'express'
 import createHttpError from 'http-errors'
 import envConfig from '~/config/evnConfig'
-import { AuthType, AuthTypeType, ConditionGuard, ConditionGuardType, REQUEST_USER_KEY } from '~/constants/auth.constant'
+import {
+  AuthType,
+  AuthTypeDecoratorPayload,
+  AuthTypeType,
+  ConditionGuard,
+  ConditionGuardType,
+  REQUEST_USER_KEY
+} from '~/constants/auth.constant'
 import { tokenService, TokenService } from '~/services/token.service'
 import { accessTokenGuard, AccessTokenGuard } from './access-token.guard'
 import { apiKeyGuard, APIKeyGuard } from './api-key.guard'
 
+export interface CanActivate {
+  canActivate(req: Request, res: Response, next: NextFunction): Promise<boolean>
+}
+
 export class AuthenticationGuard {
-  private readonly authTypeGuardMap: Record<
-    AuthTypeType,
-    { canActivate: (req: Request, res: Response, next: NextFunction) => Promise<boolean> }
-  >
+  private readonly authTypeGuardMap: Record<AuthTypeType, CanActivate>
   constructor(
     private readonly accessTokenGuard: AccessTokenGuard,
     private readonly apiKeyGuard: APIKeyGuard
@@ -23,32 +31,57 @@ export class AuthenticationGuard {
   }
 
   async canActivate(req: Request, res: Response, next: NextFunction): Promise<boolean> {
-    const authTypeValue = req ?? { authTypes: [AuthType.None], options: { condition: ConditionGuard.And } }
+    const authTypeValue = this.getAuthTypeValue(req)
     const guards = authTypeValue.authTypes.map((authType: AuthTypeType) => this.authTypeGuardMap[authType])
-    let error = createHttpError.Unauthorized()
-    if (authTypeValue.options.condition === ConditionGuard.Or) {
-      for (const instance of guards) {
-        const canActivate = await Promise.resolve(instance.canActivate(req, res, next)).catch((err) => {
-          error = err
-          return false
-        })
-        if (canActivate) {
+    return authTypeValue.options.condition === ConditionGuard.And
+      ? this.handleAndCondition(guards, req, res, next)
+      : this.handleOrCondition(guards, req, res, next)
+  }
+
+  private getAuthTypeValue(req: Request): AuthTypeDecoratorPayload {
+    return req.authTypes && req.options?.condition
+      ? { authTypes: req.authTypes, options: { condition: req.options?.condition } }
+      : {
+          authTypes: [AuthType.Bearer],
+          options: { condition: ConditionGuard.And }
+        }
+  }
+
+  private async handleOrCondition(guards: CanActivate[], req: Request, res: Response, next: NextFunction) {
+    let lastError: any = null
+
+    // Duyệt qua hết các guard, nếu có 1 guard pass thì return true
+    for (const guard of guards) {
+      try {
+        if (await guard.canActivate(req, res, next)) {
           return true
         }
+      } catch (error) {
+        lastError = error
       }
-      throw error
-    } else {
-      for (const instance of guards) {
-        const canActivate = await Promise.resolve(instance.canActivate(req, res, next)).catch((err) => {
-          error = err
-          return false
-        })
-        if (!canActivate) {
-          throw createHttpError.Unauthorized()
-        }
-      }
-      return true
     }
+
+    if (lastError instanceof createHttpError.HttpError) {
+      throw lastError
+    }
+    throw new createHttpError.Unauthorized()
+  }
+
+  private async handleAndCondition(guards: CanActivate[], req: Request, res: Response, next: NextFunction) {
+    // Duyệt qua hết các guard, nếu mọi guard đều pass thì return true
+    for (const guard of guards) {
+      try {
+        if (!(await guard.canActivate(req, res, next))) {
+          throw new createHttpError.Unauthorized()
+        }
+      } catch (error) {
+        if (error instanceof createHttpError.HttpError) {
+          throw error
+        }
+        throw createHttpError.Unauthorized()
+      }
+    }
+    return true
   }
 
   auth(
@@ -58,9 +91,10 @@ export class AuthenticationGuard {
     return async (req: Request, res: Response, next: NextFunction) => {
       req.authTypes = authTypes
       req.options = options
-      const isPublic = await this.canActivate(req, res, next)
-      if (!isPublic) {
-        return next(createHttpError.Unauthorized())
+      try {
+        await this.canActivate(req, res, next)
+      } catch (error) {
+        return next(error)
       }
       return next()
     }

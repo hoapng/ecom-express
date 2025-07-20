@@ -40,7 +40,7 @@ export class AccessTokenGuard {
 
   private async validateUserPermission(decodedAccessToken: AccessTokenPayload, request: Request): Promise<void> {
     const roleId: number = decodedAccessToken.roleId
-    const path: string = request.route.path
+    const path: string = request.originalUrl
     const method = request.method as keyof typeof HTTPMethod
     const role = await this.prismaService.role
       .findUniqueOrThrow({

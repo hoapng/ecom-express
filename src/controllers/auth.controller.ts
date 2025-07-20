@@ -7,6 +7,7 @@ import {
   GetAuthorizationUrlResSchema,
   LoginBodySchema,
   LoginResSchema,
+  RefreshTokenBodySchema,
   RefreshTokenResSchema,
   RegisterBodySchema,
   RegisterResSchema,
@@ -51,7 +52,7 @@ export class AuthController {
   }
 
   async refreshToken(req: Request, res: Response, next: NextFunction) {
-    const body = RefreshTokenResSchema.parse(req.body)
+    const body = RefreshTokenBodySchema.parse(req.body)
     const data = await this.authService.refreshToken({
       ...body,
       userAgent: req.headers['user-agent'] as string,
@@ -63,7 +64,7 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response, next: NextFunction) {
-    const body = RefreshTokenResSchema.parse(req.body)
+    const body = RefreshTokenBodySchema.parse(req.body)
     const data = await this.authService.logout(body.refreshToken)
     req.data = MessageResSchema.parse(data)
     return next()
