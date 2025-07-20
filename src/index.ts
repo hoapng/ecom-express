@@ -10,6 +10,8 @@ import requestIp from 'request-ip'
 import cors from 'cors'
 import languageRouter from './routes/language.route'
 import permissionRouter from './routes/permission.route'
+import expressListEndpoints from 'express-list-endpoints'
+import { bootstrap } from './config/create-permissions'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -52,3 +54,7 @@ initialScript()
     logger.info(`Created admin user: ${adminUser.email}`)
   })
   .catch((e) => logger.info(e.message))
+
+bootstrap(app).then((result) => {
+  logger.info(`Created ${result.count} permissions`)
+})
