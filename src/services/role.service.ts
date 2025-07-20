@@ -1,7 +1,7 @@
 import createHttpError from 'http-errors'
 import { RoleName } from '~/constants/role.constant'
 import { NotFoundRecordException } from '~/errors/error'
-import { RoleAlreadyExistsException } from '~/errors/role.error'
+import { ProhibitedActionOnBaseRoleException, RoleAlreadyExistsException } from '~/errors/role.error'
 import { RoleType } from '~/models/auth.model'
 import { CreateRoleBodyType, GetRolesQueryType, UpdateRoleBodyType } from '~/models/role.model'
 import { roleRepo, RoleRepo } from '~/repositories/role.repo'
@@ -62,12 +62,21 @@ export class RoleService {
 
   async update({ id, data, updatedById }: { id: number; data: UpdateRoleBodyType; updatedById: number }) {
     try {
-      const role = await this.roleRepo.update({
+      const role = await this.roleRepo.findById(id)
+      if (!role) {
+        throw NotFoundRecordException
+      }
+      // Không cho bất kỳ ai cập nhật role ADMIN
+      if (role.name === RoleName.Admin) {
+        throw ProhibitedActionOnBaseRoleException
+      }
+
+      const updatedRole = await this.roleRepo.update({
         id,
         updatedById,
         data
       })
-      return role
+      return updatedRole
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw NotFoundRecordException
@@ -84,6 +93,16 @@ export class RoleService {
 
   async delete({ id, deletedById }: { id: number; deletedById: number }) {
     try {
+      const role = await this.roleRepo.findById(id)
+      if (!role) {
+        throw NotFoundRecordException
+      }
+      // Không cho phép bất kỳ ai có thể xóa 3 role cơ bản này
+      const baseRoles: string[] = [RoleName.Admin, RoleName.Client, RoleName.Seller]
+      if (baseRoles.includes(role.name)) {
+        throw ProhibitedActionOnBaseRoleException
+      }
+
       await this.roleRepo.delete({
         id,
         deletedById

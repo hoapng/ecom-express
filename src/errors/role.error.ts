@@ -9,3 +9,5 @@ export const RoleAlreadyExistsException = createHttpError(StatusCodes.UNPROCESSA
     }
   ]
 })
+
+export const ProhibitedActionOnBaseRoleException = createHttpError.Forbidden('Error.ProhibitedActionOnBaseRole')
