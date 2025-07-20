@@ -7,7 +7,6 @@ const authRouter = Router()
 
 authRouter.post(
   '/register',
-
   wrapRequestHandler((req, res, next) => authController.register(req, res, next))
 )
 

@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express'
 import envConfig from './config/evnConfig'
 import authRouter from './routes/auth.route'
-import { initialScript } from './config/initialScript'
+import { bootstrap, initialScript } from './config/initialScript'
 import { logger } from './config/logger'
 import z from 'zod'
 import createHttpError from 'http-errors'
@@ -10,8 +10,6 @@ import requestIp from 'request-ip'
 import cors from 'cors'
 import languageRouter from './routes/language.route'
 import permissionRouter from './routes/permission.route'
-import expressListEndpoints from 'express-list-endpoints'
-import { bootstrap } from './config/create-permissions'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -55,6 +53,4 @@ initialScript()
   })
   .catch((e) => logger.info(e.message))
 
-bootstrap(app).then((result) => {
-  logger.info(`Created ${result.count} permissions`)
-})
+bootstrap(app)
