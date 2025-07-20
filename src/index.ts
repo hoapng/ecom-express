@@ -10,6 +10,7 @@ import requestIp from 'request-ip'
 import cors from 'cors'
 import languageRouter from './routes/language.route'
 import permissionRouter from './routes/permission.route'
+import { auth } from './midlewares/authentication.guard'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -20,9 +21,9 @@ app.use(requestIp.mw(), express.json())
 
 app.use('/auth', authRouter)
 
-app.use('/languages', languageRouter)
+app.use('/languages', auth(), languageRouter)
 
-app.use('/permissions', permissionRouter)
+app.use('/permissions', auth(), permissionRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

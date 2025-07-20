@@ -7,31 +7,26 @@ const permissionRouter = Router()
 
 permissionRouter.get(
   '/',
-  auth(),
   wrapRequestHandler((req, res, next) => permissionController.list(req, res, next))
 )
 
 permissionRouter.get(
   '/:permissionId',
-  auth(),
   wrapRequestHandler((req, res, next) => permissionController.findById(req, res, next))
 )
 
 permissionRouter.post(
   '/',
-  auth(),
   wrapRequestHandler((req, res, next) => permissionController.create(req, res, next))
 )
 
 permissionRouter.put(
   '/:permissionId',
-  auth(),
   wrapRequestHandler((req, res, next) => permissionController.update(req, res, next))
 )
 
 permissionRouter.delete(
   '/:permissionId',
-  auth(),
   wrapRequestHandler((req, res, next) => permissionController.delete(req, res, next))
 )
 

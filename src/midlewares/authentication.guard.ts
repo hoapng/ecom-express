@@ -9,7 +9,7 @@ import { apiKeyGuard, APIKeyGuard } from './api-key.guard'
 export class AuthenticationGuard {
   private readonly authTypeGuardMap: Record<
     AuthTypeType,
-    { canActivate: (req: Request, res: Response, next: NextFunction) => boolean }
+    { canActivate: (req: Request, res: Response, next: NextFunction) => Promise<boolean> }
   >
   constructor(
     private readonly accessTokenGuard: AccessTokenGuard,
@@ -18,7 +18,7 @@ export class AuthenticationGuard {
     this.authTypeGuardMap = {
       [AuthType.Bearer]: this.accessTokenGuard,
       [AuthType.APIKey]: this.apiKeyGuard,
-      [AuthType.None]: { canActivate: () => true }
+      [AuthType.None]: { canActivate: () => Promise.resolve(true) }
     }
   }
 
