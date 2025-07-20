@@ -118,4 +118,28 @@ export const bootstrap = async (app: Express.Application) => {
   } else {
     logger.info('No permissions to add')
   }
+
+  // Lấy lại permissions trong database sau khi thêm mới (hoặc bị xóa)
+  const updatedPermissionsInDb = await prismaService.permission.findMany({
+    where: {
+      deletedAt: null
+    }
+  })
+  // Cập nhật lại các permissions trong Admin Role
+  const adminRole = await prismaService.role.findFirstOrThrow({
+    where: {
+      name: RoleName.Admin,
+      deletedAt: null
+    }
+  })
+  await prismaService.role.update({
+    where: {
+      id: adminRole.id
+    },
+    data: {
+      permissions: {
+        set: updatedPermissionsInDb.map((item) => ({ id: item.id }))
+      }
+    }
+  })
 }
