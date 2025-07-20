@@ -1,7 +1,7 @@
-import { UserType } from '~/models/shared-user.model'
+import { UserType } from '~/models/user.model'
 import { PrismaService, prismaService } from '~/services/prisma.service'
 
-export class SharedUserRepository {
+export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async findUnique(uniqueObject: { email: string } | { id: number }): Promise<UserType | null> {
@@ -11,4 +11,4 @@ export class SharedUserRepository {
   }
 }
 
-export const sharedUserRepository = new SharedUserRepository(prismaService)
+export const userRepository = new UserRepository(prismaService)

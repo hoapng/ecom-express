@@ -7,7 +7,7 @@ import {
   RoleType,
   VerificationCodeType
 } from '~/models/auth.model'
-import { UserType } from '~/models/shared-user.model'
+import { UserType } from '~/models/user.model'
 import { TypeOfVerificationCodeType } from '~/constants/auth.constant'
 
 export class AuthRepository {

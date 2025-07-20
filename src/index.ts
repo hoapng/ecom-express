@@ -46,11 +46,11 @@ app.listen(PORT, () => {
   logger.info(`My app is running on port: ${PORT}`)
 })
 
+bootstrap(app)
+
 initialScript()
   .then(({ adminUser, createdRoleCount }) => {
     logger.info(`Created ${createdRoleCount} roles`)
     logger.info(`Created admin user: ${adminUser.email}`)
   })
   .catch((e) => logger.info(e.message))
-
-bootstrap(app)

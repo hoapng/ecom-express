@@ -4,7 +4,7 @@ import { google } from 'googleapis'
 import { GoogleAuthStateType } from '~/models/auth.model'
 import { authRepository, AuthRepository } from '~/repositories/auth.repo'
 import { hashingService, HashingService } from './hashing.service'
-import { rolesService, RolesService } from './role.service'
+import { roleService, RoleService } from './role.service'
 import { authService, AuthService } from './auth.service'
 import { v4 as uuidv4 } from 'uuid'
 import { GoogleUserInfoError } from '~/errors/auth.error'
@@ -14,7 +14,7 @@ export class GoogleService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly hashingService: HashingService,
-    private readonly rolesService: RolesService,
+    private readonly roleService: RoleService,
     private readonly authService: AuthService
   ) {
     this.oauth2Client = new google.auth.OAuth2(
@@ -74,7 +74,7 @@ export class GoogleService {
       })
       // Nếu không có user tức là người mới, vậy nên sẽ tiến hành đăng ký
       if (!user) {
-        const clientRoleId = await this.rolesService.getClientRoleId()
+        const clientRoleId = await this.roleService.getClientRoleId()
         const randomPassword = uuidv4()
         const hashedPassword = await this.hashingService.hash(randomPassword)
         user = await this.authRepository.createUserInclueRole({
@@ -105,4 +105,4 @@ export class GoogleService {
   }
 }
 
-export const googleService = new GoogleService(authRepository, hashingService, rolesService, authService)
+export const googleService = new GoogleService(authRepository, hashingService, roleService, authService)

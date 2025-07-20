@@ -1,7 +1,7 @@
 import { generateOTP, isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
 import { hashingService, HashingService } from './hashing.service'
 import { prismaService } from './prisma.service'
-import { rolesService, RolesService } from './role.service'
+import { roleService, RoleService } from './role.service'
 import createHttpError from 'http-errors'
 import { tokenService, TokenService } from './token.service'
 import {
@@ -14,7 +14,7 @@ import {
   SendOTPBodyType
 } from '~/models/auth.model'
 import { authRepository, AuthRepository } from '~/repositories/auth.repo'
-import { SharedUserRepository, sharedUserRepository } from '~/repositories/shared-user.repo'
+import { UserRepository, userRepository } from '~/repositories/user.repo'
 import { addMilliseconds } from 'date-fns'
 import envConfig from '~/config/evnConfig'
 import ms, { StringValue } from 'ms'
@@ -41,9 +41,9 @@ import { twoFactorService, TwoFactorService } from './2fa.service'
 export class AuthService {
   constructor(
     private readonly hashingService: HashingService,
-    private readonly rolesService: RolesService,
+    private readonly roleService: RoleService,
     private readonly authRepository: AuthRepository,
-    private readonly sharedUserRepository: SharedUserRepository,
+    private readonly userRepository: UserRepository,
     private readonly emailService: EmailService,
     private readonly tokenService: TokenService,
     private readonly twoFactorService: TwoFactorService
@@ -82,7 +82,7 @@ export class AuthService {
         type: TypeOfVerificationCode.REGISTER
       })
 
-      const clientRoleId = await this.rolesService.getClientRoleId()
+      const clientRoleId = await this.roleService.getClientRoleId()
       const hashedPassword = await this.hashingService.hash(body.password)
 
       const [user] = await Promise.all([
@@ -112,7 +112,7 @@ export class AuthService {
 
   async sendOTP(body: SendOTPBodyType) {
     // 1. Kiểm tra email đã tồn tại trong database chưa
-    const user = await this.sharedUserRepository.findUnique({
+    const user = await this.userRepository.findUnique({
       email: body.email
     })
     if (body.type === TypeOfVerificationCode.REGISTER && user) {
@@ -287,7 +287,7 @@ export class AuthService {
   async forgotPassword(body: ForgotPasswordBodyType) {
     const { email, code, newPassword } = body
     // 1. Kiểm tra email đã tồn tại trong database chưa
-    const user = await this.sharedUserRepository.findUnique({
+    const user = await this.userRepository.findUnique({
       email
     })
     if (!user) {
@@ -323,7 +323,7 @@ export class AuthService {
 
   async setupTwoFactorAuth(userId: number) {
     // 1. Lấy thông tin user, kiểm tra xem user có tồn tại hay không, và xem họ đã bật 2FA chưa
-    const user = await this.sharedUserRepository.findUnique({
+    const user = await this.userRepository.findUnique({
       id: userId
     })
     if (!user) {
@@ -346,7 +346,7 @@ export class AuthService {
   async disableTwoFactorAuth(data: DisableTwoFactorBodyType & { userId: number }) {
     const { userId, totpCode, code } = data
     // 1. Lấy thông tin user, kiểm tra xem user có tồn tại hay không, và xem họ đã bật 2FA chưa
-    const user = await this.sharedUserRepository.findUnique({ id: userId })
+    const user = await this.userRepository.findUnique({ id: userId })
     if (!user) {
       throw EmailNotFoundException
     }
@@ -385,9 +385,9 @@ export class AuthService {
 
 export const authService = new AuthService(
   hashingService,
-  rolesService,
+  roleService,
   authRepository,
-  sharedUserRepository,
+  userRepository,
   emailService,
   tokenService,
   twoFactorService
