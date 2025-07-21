@@ -39,8 +39,14 @@ export class AccessTokenGuard {
   }
 
   private async validateUserPermission(decodedAccessToken: AccessTokenPayload, request: Request): Promise<void> {
+    let path = request.originalUrl.split('?')[0]
+    const lastSegment = path.split('/').at(-1)
+
+    if (lastSegment && !Number.isNaN(Number(lastSegment))) {
+      path = path.replace(`/${lastSegment}`, '/:id')
+    }
+
     const roleId: number = decodedAccessToken.roleId
-    const path: string = request.originalUrl
     const method = request.method as keyof typeof HTTPMethod
     const role = await this.prismaService.role
       .findUniqueOrThrow({
