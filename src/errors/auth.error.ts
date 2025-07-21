@@ -53,7 +53,7 @@ export const InvalidPasswordException = createHttpError(StatusCodes.UNPROCESSABL
   message: [
     {
       message: 'Error.InvalidPassword',
-      path: 'passwo}rd'
+      path: 'password'
     }
   ]
 })

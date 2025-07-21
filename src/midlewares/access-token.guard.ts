@@ -52,7 +52,8 @@ export class AccessTokenGuard {
       .findUniqueOrThrow({
         where: {
           id: roleId,
-          deletedAt: null
+          deletedAt: null,
+          isActive: true
         },
         include: {
           permissions: {
