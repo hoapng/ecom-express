@@ -63,7 +63,8 @@ export const bootstrap = async (app: Express.Application) => {
         return {
           path: item.path,
           method: method as keyof typeof HTTPMethod,
-          name: method + ' ' + item.path
+          name: method + ' ' + item.path,
+          module: item.path.split('/')[1] // Lấy module từ path
         }
       })
     })
