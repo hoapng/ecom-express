@@ -8,27 +8,10 @@ import { PrismaService, prismaService } from '~/services/prisma.service'
 import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
 
 export class RoleService {
-  private clientRoleId: number | null = null
-
-  constructor(
-    private readonly prismaService: PrismaService,
-    private roleRepo: RoleRepo
-  ) {}
+  constructor(private roleRepo: RoleRepo) {}
 
   async getClientRoleId() {
-    if (this.clientRoleId) {
-      return this.clientRoleId
-    }
-    const role: RoleType = await this.prismaService.$queryRaw<RoleType[]>`
-      SELECT * FROM "Role" WHERE name = ${RoleName.Client} AND "deletedAt" IS NULL LIMIT 1;
-    `.then((res: RoleType[]) => {
-      if (res.length === 0) {
-        throw new Error('Client role not found')
-      }
-      return res[0]
-    })
-    this.clientRoleId = role.id
-    return role.id
+    return this.roleRepo.getClientRoleId()
   }
 
   async list(pagination: GetRolesQueryType) {
@@ -115,4 +98,4 @@ export class RoleService {
   }
 }
 
-export const roleService = new RoleService(prismaService, roleRepo)
+export const roleService = new RoleService(roleRepo)
