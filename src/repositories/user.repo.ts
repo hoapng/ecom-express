@@ -5,7 +5,7 @@ import { PrismaService, prismaService } from '~/services/prisma.service'
 
 type UserIncludeRolePermissionsType = UserType & { role: RoleType & { permissions: PermissionType[] } }
 
-type WhereUniqueUserType = { id: number; [key: string]: any } | { email: string; [key: string]: any }
+export type WhereUniqueUserType = { id: number; [key: string]: any } | { email: string; [key: string]: any }
 export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 

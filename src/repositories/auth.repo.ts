@@ -3,6 +3,7 @@ import { DeviceType, RefreshTokenType, RegisterBodyType, VerificationCodeType } 
 import { UserType } from '~/models/user.model'
 import { TypeOfVerificationCodeType } from '~/constants/auth.constant'
 import { RoleType } from '~/models/role.model'
+import { WhereUniqueUserType } from './user.repo'
 
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -68,22 +69,20 @@ export class AuthRepository {
     })
   }
 
-  async findUniqueUserIncludeRole(
-    uniqueObject: { email: string } | { id: number }
-  ): Promise<(UserType & { role: RoleType }) | null> {
+  async findUniqueUserIncludeRole(where: WhereUniqueUserType): Promise<(UserType & { role: RoleType }) | null> {
     return this.prismaService.user.findUnique({
-      where: uniqueObject,
+      where,
       include: {
         role: true
       }
     })
   }
 
-  async findUniqueRefreshTokenIncludeUserRole(uniqueObject: {
+  async findUniqueRefreshTokenIncludeUserRole(where: {
     token: string
   }): Promise<(RefreshTokenType & { user: UserType & { role: RoleType } }) | null> {
     return this.prismaService.refreshToken.findUnique({
-      where: uniqueObject,
+      where,
       include: {
         user: {
           include: {
@@ -103,9 +102,9 @@ export class AuthRepository {
     })
   }
 
-  deleteRefreshToken(uniqueObject: { token: string }): Promise<RefreshTokenType> {
+  deleteRefreshToken(where: { token: string }): Promise<RefreshTokenType> {
     return this.prismaService.refreshToken.delete({
-      where: uniqueObject
+      where
     })
   }
 
@@ -117,13 +116,6 @@ export class AuthRepository {
       include: {
         role: true
       }
-    })
-  }
-
-  updateUser(where: { id: number } | { email: string }, data: Partial<Omit<UserType, 'id'>>): Promise<UserType> {
-    return this.prismaService.user.update({
-      where,
-      data
     })
   }
 

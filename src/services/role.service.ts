@@ -91,9 +91,6 @@ export class RoleService {
       if (isUniqueConstraintPrismaError(error)) {
         throw RoleAlreadyExistsException
       }
-      if (error instanceof Error) {
-        throw createHttpError.BadRequest(error.message)
-      }
       throw error
     }
   }

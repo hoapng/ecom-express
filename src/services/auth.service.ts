@@ -113,7 +113,8 @@ export class AuthService {
   async sendOTP(body: SendOTPBodyType) {
     // 1. Kiểm tra email đã tồn tại trong database chưa
     const user = await this.userRepository.findUnique({
-      email: body.email
+      email: body.email,
+      deletedAt: null
     })
     if (body.type === TypeOfVerificationCode.REGISTER && user) {
       throw EmailAlreadyExistsException
@@ -143,7 +144,8 @@ export class AuthService {
   async login(body: LoginBodyType & { userAgent: string; ip: string }) {
     // 1. Lấy thông tin user, kiểm tra user có tồn tại hay không, mật khẩu có đúng không
     const user = await this.authRepository.findUniqueUserIncludeRole({
-      email: body.email
+      email: body.email,
+      deletedAt: null
     })
 
     if (!user) {
@@ -288,7 +290,8 @@ export class AuthService {
     const { email, code, newPassword } = body
     // 1. Kiểm tra email đã tồn tại trong database chưa
     const user = await this.userRepository.findUnique({
-      email
+      email,
+      deletedAt: null
     })
     if (!user) {
       throw EmailNotFoundException
@@ -302,10 +305,11 @@ export class AuthService {
     //3. Cập nhật lại mật khẩu mới và xóa đi OTP
     const hashedPassword = await this.hashingService.hash(newPassword)
     await Promise.all([
-      this.authRepository.updateUser(
-        { id: user.id },
+      this.userRepository.update(
+        { id: user.id, deletedAt: null },
         {
-          password: hashedPassword
+          password: hashedPassword,
+          updatedById: user.id
         }
       ),
       this.authRepository.deleteVerificationCode({
@@ -335,7 +339,7 @@ export class AuthService {
     // 2. Tạo ra secret và uri
     const { secret, uri } = this.twoFactorService.generateTOTPSecret(user.email)
     // 3. Cập nhật secret vào user trong database
-    await this.authRepository.updateUser({ id: userId }, { totpSecret: secret })
+    await this.userRepository.update({ id: userId, deletedAt: null }, { totpSecret: secret, updatedById: userId })
     // 4. Trả về secret và uri
     return {
       secret,
@@ -346,7 +350,7 @@ export class AuthService {
   async disableTwoFactorAuth(data: DisableTwoFactorBodyType & { userId: number }) {
     const { userId, totpCode, code } = data
     // 1. Lấy thông tin user, kiểm tra xem user có tồn tại hay không, và xem họ đã bật 2FA chưa
-    const user = await this.userRepository.findUnique({ id: userId })
+    const user = await this.userRepository.findUnique({ id: userId, deletedAt: null })
     if (!user) {
       throw EmailNotFoundException
     }
@@ -374,7 +378,7 @@ export class AuthService {
     }
 
     // 4. Cập nhật secret thành null
-    await this.authRepository.updateUser({ id: userId }, { totpSecret: null })
+    await this.userRepository.update({ id: userId, deletedAt: null }, { totpSecret: null, updatedById: userId })
 
     // 5. Trả về thông báo
     return {
