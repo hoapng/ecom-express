@@ -9,7 +9,7 @@ import {
 } from '~/models/role.model'
 import { prismaService, PrismaService } from '~/services/prisma.service'
 
-export class RoleRepo {
+export class RoleRepository {
   private clientRoleId: number | null = null
   private adminRoleId: number | null = null
 
@@ -176,4 +176,4 @@ export class RoleRepo {
   }
 }
 
-export const roleRepo = new RoleRepo(prismaService)
+export const roleRepository = new RoleRepository(prismaService)

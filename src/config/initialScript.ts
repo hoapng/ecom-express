@@ -1,6 +1,6 @@
-import { HTTPMethod, RoleName } from '~/constants/role.constant'
-import { hashingService, HashingService } from '~/services/hashing.service'
-import { PrismaService, prismaService } from '~/services/prisma.service'
+import { HTTPMethodType, RoleName } from '~/constants/role.constant'
+import { hashingService } from '~/services/hashing.service'
+import { prismaService } from '~/services/prisma.service'
 import envConfig from './evnConfig'
 import expressListEndpoints from 'express-list-endpoints'
 import { logger } from './logger'
@@ -57,12 +57,12 @@ export const bootstrap = async (app: Express.Application) => {
     }
   })
 
-  const availableRoutes: { path: string; method: keyof typeof HTTPMethod; name: string }[] = endpoints
+  const availableRoutes: { path: string; method: HTTPMethodType; name: string }[] = endpoints
     .map((item) => {
       return item.methods.map((method) => {
         return {
           path: item.path,
-          method: method as keyof typeof HTTPMethod,
+          method: method as HTTPMethodType,
           name: method + ' ' + item.path,
           module: item.path.split('/')[1] // Lấy module từ path
         }

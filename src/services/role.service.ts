@@ -3,24 +3,24 @@ import { RoleName } from '~/constants/role.constant'
 import { NotFoundRecordException } from '~/errors/error'
 import { ProhibitedActionOnBaseRoleException, RoleAlreadyExistsException } from '~/errors/role.error'
 import { CreateRoleBodyType, GetRolesQueryType, RoleType, UpdateRoleBodyType } from '~/models/role.model'
-import { roleRepo, RoleRepo } from '~/repositories/role.repo'
+import { roleRepository, RoleRepository } from '~/repositories/role.repo'
 import { PrismaService, prismaService } from '~/services/prisma.service'
 import { isNotFoundPrismaError, isUniqueConstraintPrismaError } from '~/utils/helper'
 
 export class RoleService {
-  constructor(private roleRepo: RoleRepo) {}
+  constructor(private roleRepository: RoleRepository) {}
 
   async getClientRoleId() {
-    return this.roleRepo.getClientRoleId()
+    return this.roleRepository.getClientRoleId()
   }
 
   async list(pagination: GetRolesQueryType) {
-    const data = await this.roleRepo.list(pagination)
+    const data = await this.roleRepository.list(pagination)
     return data
   }
 
   async findById(id: number) {
-    const role = await this.roleRepo.findById(id)
+    const role = await this.roleRepository.findById(id)
     if (!role) {
       throw NotFoundRecordException
     }
@@ -29,7 +29,7 @@ export class RoleService {
 
   async create({ data, createdById }: { data: CreateRoleBodyType; createdById: number }) {
     try {
-      const role = await this.roleRepo.create({
+      const role = await this.roleRepository.create({
         createdById,
         data
       })
@@ -46,7 +46,7 @@ export class RoleService {
    * Kiểm tra xem role có phải là 1 trong 3 role cơ bản không
    */
   private async verifyRole(roleId: number) {
-    const role = await this.roleRepo.findById(roleId)
+    const role = await this.roleRepository.findById(roleId)
     if (!role) {
       throw NotFoundRecordException
     }
@@ -61,7 +61,7 @@ export class RoleService {
     try {
       await this.verifyRole(id)
 
-      const updatedRole = await this.roleRepo.update({
+      const updatedRole = await this.roleRepository.update({
         id,
         updatedById,
         data
@@ -82,7 +82,7 @@ export class RoleService {
     try {
       await this.verifyRole(id)
 
-      await this.roleRepo.delete({
+      await this.roleRepository.delete({
         id,
         deletedById
       })
@@ -98,4 +98,4 @@ export class RoleService {
   }
 }
 
-export const roleService = new RoleService(roleRepo)
+export const roleService = new RoleService(roleRepository)

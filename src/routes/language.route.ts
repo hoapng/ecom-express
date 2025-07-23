@@ -10,7 +10,7 @@ languageRouter.get(
 )
 
 languageRouter.get(
-  '/:id',
+  '/:languageId',
   wrapRequestHandler((req, res, next) => languageController.findById(req, res, next))
 )
 
@@ -20,12 +20,12 @@ languageRouter.post(
 )
 
 languageRouter.put(
-  '/:id',
+  '/:languageId',
   wrapRequestHandler((req, res, next) => languageController.update(req, res, next))
 )
 
 languageRouter.delete(
-  '/:id',
+  '/:languageId',
   wrapRequestHandler((req, res, next) => languageController.delete(req, res, next))
 )
 

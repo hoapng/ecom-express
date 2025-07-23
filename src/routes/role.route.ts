@@ -10,7 +10,7 @@ roleRouter.get(
 )
 
 roleRouter.get(
-  '/:id',
+  '/:roleId',
   wrapRequestHandler((req, res, next) => roleController.findById(req, res, next))
 )
 
@@ -20,12 +20,12 @@ roleRouter.post(
 )
 
 roleRouter.put(
-  '/:id',
+  '/:roleId',
   wrapRequestHandler((req, res, next) => roleController.update(req, res, next))
 )
 
 roleRouter.delete(
-  '/:id',
+  '/:roleId',
   wrapRequestHandler((req, res, next) => roleController.delete(req, res, next))
 )
 

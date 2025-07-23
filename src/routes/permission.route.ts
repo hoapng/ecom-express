@@ -10,7 +10,7 @@ permissionRouter.get(
 )
 
 permissionRouter.get(
-  '/:id',
+  '/:permissionId',
   wrapRequestHandler((req, res, next) => permissionController.findById(req, res, next))
 )
 
@@ -20,12 +20,12 @@ permissionRouter.post(
 )
 
 permissionRouter.put(
-  '/:id',
+  '/:permissionId',
   wrapRequestHandler((req, res, next) => permissionController.update(req, res, next))
 )
 
 permissionRouter.delete(
-  '/:id',
+  '/:permissionId',
   wrapRequestHandler((req, res, next) => permissionController.delete(req, res, next))
 )
 

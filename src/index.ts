@@ -13,6 +13,7 @@ import permissionRouter from './routes/permission.route'
 import { auth } from './midlewares/authentication.guard'
 import roleRouter from './routes/role.route'
 import profileRouter from './routes/profile.route'
+import userRouter from './routes/user.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -30,6 +31,8 @@ app.use('/permissions', auth(), permissionRouter)
 app.use('/roles', auth(), roleRouter)
 
 app.use('/profile', auth(), profileRouter)
+
+app.use('/users', auth(), userRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

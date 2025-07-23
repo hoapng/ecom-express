@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import createHttpError from 'http-errors'
-import { REQUEST_USER_KEY } from '~/constants/auth.constant'
-import { HTTPMethod } from '~/constants/role.constant'
+import pluralize from 'pluralize'
+import { REQUEST_ROLE_PERMISSIONS, REQUEST_USER_KEY } from '~/constants/auth.constant'
+import { HTTPMethodType } from '~/constants/role.constant'
 import { prismaService, PrismaService } from '~/services/prisma.service'
 import { tokenService, TokenService } from '~/services/token.service'
 import { AccessTokenPayload } from '~/types/jwt.type'
@@ -43,11 +44,12 @@ export class AccessTokenGuard {
     const lastSegment = path.split('/').at(-1)
 
     if (lastSegment && !Number.isNaN(Number(lastSegment))) {
-      path = path.replace(`/${lastSegment}`, '/:id')
+      const module = pluralize.singular(request.baseUrl.slice(1))
+      path = path.replace(`/${lastSegment}`, `/:${module}Id`)
     }
 
     const roleId: number = decodedAccessToken.roleId
-    const method = request.method as keyof typeof HTTPMethod
+    const method = request.method as HTTPMethodType
     const role = await this.prismaService.role
       .findUniqueOrThrow({
         where: {
@@ -72,6 +74,7 @@ export class AccessTokenGuard {
     if (!canAccess) {
       throw createHttpError.Forbidden()
     }
+    request[REQUEST_ROLE_PERMISSIONS] = role
   }
 }
 
