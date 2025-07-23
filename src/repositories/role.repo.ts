@@ -1,8 +1,8 @@
-import { RoleType } from '~/models/auth.model'
 import {
   CreateRoleBodyType,
   GetRolesQueryType,
   GetRolesResType,
+  RoleType,
   RoleWithPermissionsType,
   UpdateRoleBodyType
 } from '~/models/role.model'

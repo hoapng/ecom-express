@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { languageController } from '~/controllers/language.controller'
-import { auth } from '~/midlewares/authentication.guard'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
 
 const languageRouter = Router()

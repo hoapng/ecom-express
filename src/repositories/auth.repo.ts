@@ -1,14 +1,8 @@
 import { PrismaService, prismaService } from '~/services/prisma.service'
-import {
-  DeviceType,
-  RefreshTokenType,
-  RegisterBodyType,
-  RegisterResSchema,
-  RoleType,
-  VerificationCodeType
-} from '~/models/auth.model'
+import { DeviceType, RefreshTokenType, RegisterBodyType, VerificationCodeType } from '~/models/auth.model'
 import { UserType } from '~/models/user.model'
 import { TypeOfVerificationCodeType } from '~/constants/auth.constant'
+import { RoleType } from '~/models/role.model'
 
 export class AuthRepository {
   constructor(private readonly prismaService: PrismaService) {}

@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { permissionController } from '~/controllers/permission.controller'
-import { auth } from '~/midlewares/authentication.guard'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
 
 const permissionRouter = Router()

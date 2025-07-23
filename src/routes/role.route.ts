@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { roleController } from '~/controllers/role.controller'
-import { auth } from '~/midlewares/authentication.guard'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
 
 const roleRouter = Router()
