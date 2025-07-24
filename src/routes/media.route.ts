@@ -2,13 +2,13 @@ import { Router } from 'express'
 import multer from 'multer'
 import { mediaController } from '~/controllers/media.controller'
 import { wrapRequestHandler } from '~/utils/wrapRequestHandler'
-import path from 'path'
 import { generateRandomFilename } from '~/utils/helper'
 import { existsSync, mkdirSync } from 'fs'
+import createHttpError from 'http-errors'
+import { UPLOAD_DIR } from '~/constants/other.constant'
+import { auth } from '~/midlewares/authentication.guard'
 
 const mediaRouter = Router()
-
-const UPLOAD_DIR = path.resolve('upload')
 
 if (!existsSync(UPLOAD_DIR)) {
   mkdirSync(UPLOAD_DIR, { recursive: true })
@@ -27,18 +27,41 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 1 * 1024 * 1024 // 1MB
+    fileSize: 5 * 1024 * 1024 // 5MB
   },
   fileFilter: (req, file, cb) => {
     const allowedImageTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp']
-    cb(null, allowedImageTypes.includes(file.mimetype))
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(
+        createHttpError.BadRequest(
+          `Validation failed (current file type is ${file.mimetype}, expected type is /(jpg|jpeg|png|webp)$/)`
+        )
+      )
+    }
   }
-})
+}).array('files')
 
 mediaRouter.post(
   '/images/upload',
-  upload.single('file'),
+  auth(),
+  function (req, res, next) {
+    upload(req, res, function (err) {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        next(createHttpError.PayloadTooLarge(err.message))
+      } else if (err) {
+        next(err)
+      }
+      next()
+    })
+  },
   wrapRequestHandler((req, res, next) => mediaController.uploadFile(req, res, next))
+)
+
+mediaRouter.get(
+  '/static/:filename',
+  wrapRequestHandler((req, res, next) => mediaController.serveFile(req, res, next))
 )
 
 export default mediaRouter

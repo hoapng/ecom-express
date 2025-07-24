@@ -8,6 +8,7 @@ declare global {
       data?: any
       statusCode?: StatusCodes
       [REQUEST_USER_KEY]?: AccessTokenPayload
+      files?: Express.Multer.File[] // For file uploads
       [key: string]: any // Allow additional properties
     }
   }
