@@ -15,6 +15,8 @@ import roleRouter from './routes/role.route'
 import profileRouter from './routes/profile.route'
 import userRouter from './routes/user.route'
 import mediaRouter from './routes/media.route'
+import brandTranslationRouter from './routes/brand-translation.route'
+import brandRouter from './routes/brand.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -36,6 +38,10 @@ app.use('/profile', auth(), profileRouter)
 app.use('/users', auth(), userRouter)
 
 app.use('/media', mediaRouter)
+
+app.use('/brand-translations', auth(), brandTranslationRouter)
+
+app.use('/brand', brandRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

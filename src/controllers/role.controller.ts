@@ -15,7 +15,7 @@ import { REQUEST_USER_KEY } from '~/constants/auth.constant'
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  list = async (req: Request, res: Response, next: NextFunction) => {
+  async list(req: Request, res: Response, next: NextFunction) {
     const query = GetRolesQuerySchema.parse(req.query)
     const data = await this.roleService.list({
       page: query.page,
@@ -25,14 +25,14 @@ export class RoleController {
     return next()
   }
 
-  findById = async (req: Request, res: Response, next: NextFunction) => {
+  async findById(req: Request, res: Response, next: NextFunction) {
     const params = GetRoleParamsSchema.parse(req.params)
     const data = await this.roleService.findById(params.roleId)
     req.data = GetRoleDetailResSchema.parse(data)
     return next()
   }
 
-  create = async (req: Request, res: Response, next: NextFunction) => {
+  async create(req: Request, res: Response, next: NextFunction) {
     const body = CreateRoleBodySchema.parse(req.body)
     const userId = req[REQUEST_USER_KEY]?.userId as number
     const data = await this.roleService.create({
@@ -43,7 +43,7 @@ export class RoleController {
     return next()
   }
 
-  update = async (req: Request, res: Response, next: NextFunction) => {
+  async update(req: Request, res: Response, next: NextFunction) {
     const body = UpdateRoleBodySchema.parse(req.body)
     const params = GetRoleParamsSchema.parse(req.params)
     const userId = req[REQUEST_USER_KEY]?.userId as number
@@ -56,7 +56,7 @@ export class RoleController {
     return next()
   }
 
-  delete = async (req: Request, res: Response, next: NextFunction) => {
+  async delete(req: Request, res: Response, next: NextFunction) {
     const params = GetRoleParamsSchema.parse(req.params)
     const userId = req[REQUEST_USER_KEY]?.userId as number
     const data = await this.roleService.delete({
