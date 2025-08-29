@@ -44,7 +44,9 @@ export class AccessTokenGuard {
     const lastSegment = path.split('/').at(-1)
 
     if (lastSegment && !Number.isNaN(Number(lastSegment))) {
-      const module = pluralize.singular(request.baseUrl.slice(1))
+      const module = pluralize.singular(
+        request.baseUrl.slice(1).replace(/-([a-z])/g, (match, letter) => letter.toUpperCase())
+      )
       path = path.replace(`/${lastSegment}`, `/:${module}Id`)
     }
 
