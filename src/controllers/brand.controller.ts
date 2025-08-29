@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
+import { I18nTranslations } from '~/generated/i18n.generated'
 import {
   CreateBrandBodySchema,
   GetBrandDetailResSchema,
@@ -15,18 +16,23 @@ export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
   async list(req: Request, res: Response, next: NextFunction) {
+    const lang = req.getLocale()
     const query = PaginationQuerySchema.parse(req.query)
-    const data = await this.brandService.list({
-      page: query.page,
-      limit: query.limit
-    })
+    const data = await this.brandService.list(
+      {
+        page: query.page,
+        limit: query.limit
+      },
+      lang
+    )
     req.data = GetBrandsResSchema.parse(data)
     return next()
   }
 
   async findById(req: Request, res: Response, next: NextFunction) {
+    const lang = req.getLocale()
     const params = GetBrandParamsSchema.parse(req.params)
-    const data = await this.brandService.findById(params.brandId)
+    const data = await this.brandService.findById(params.brandId, lang)
     req.data = GetBrandDetailResSchema.parse(data)
     return next()
   }

@@ -7,13 +7,13 @@ import { isNotFoundPrismaError } from '~/utils/helper'
 export class BrandService {
   constructor(private brandRepo: BrandRepo) {}
 
-  async list(pagination: PaginationQueryType) {
-    const data = await this.brandRepo.list(pagination)
+  async list(pagination: PaginationQueryType, lang: string) {
+    const data = await this.brandRepo.list(pagination, lang)
     return data
   }
 
-  async findById(id: number) {
-    const brand = await this.brandRepo.findById(id)
+  async findById(id: number, lang: string) {
+    const brand = await this.brandRepo.findById(id, lang)
     if (!brand) {
       throw NotFoundRecordException
     }

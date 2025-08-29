@@ -17,6 +17,8 @@ import userRouter from './routes/user.route'
 import mediaRouter from './routes/media.route'
 import brandTranslationRouter from './routes/brand-translation.route'
 import brandRouter from './routes/brand.route'
+import i18n from 'i18n'
+import path from 'path'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -24,6 +26,17 @@ const PORT = envConfig.PORT || 8080
 app.use(cors())
 
 app.use(requestIp.mw(), express.json())
+
+i18n.configure({
+  locales: ['en', 'vi'],
+  directory: path.resolve('src/i18n/'),
+  objectNotation: true,
+  queryParameter: 'lang',
+  header: 'accept-language',
+  defaultLocale: 'en'
+})
+
+app.use(i18n.init)
 
 app.use('/auth', authRouter)
 

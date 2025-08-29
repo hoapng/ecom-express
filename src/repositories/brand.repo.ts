@@ -1,3 +1,4 @@
+import { ALL_LANGUAGE_CODE } from '~/constants/other.constant'
 import {
   BrandIncludeTranslationType,
   BrandType,
@@ -11,7 +12,7 @@ import { prismaService, PrismaService } from '~/services/prisma.service'
 export class BrandRepo {
   constructor(private prismaService: PrismaService) {}
 
-  async list(pagination: PaginationQueryType, languageId?: string): Promise<GetBrandsResType> {
+  async list(pagination: PaginationQueryType, languageId: string): Promise<GetBrandsResType> {
     const skip = (pagination.page - 1) * pagination.limit
     const take = pagination.limit
     const [totalItems, data] = await Promise.all([
@@ -26,7 +27,7 @@ export class BrandRepo {
         },
         include: {
           brandTranslations: {
-            where: languageId ? { deletedAt: null, languageId } : { deletedAt: null }
+            where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { deletedAt: null, languageId }
           }
         },
         orderBy: {
