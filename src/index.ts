@@ -41,7 +41,7 @@ app.use('/media', mediaRouter)
 
 app.use('/brand-translations', auth(), brandTranslationRouter)
 
-app.use('/brand', brandRouter)
+app.use('/brands', brandRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

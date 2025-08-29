@@ -39,7 +39,7 @@ export const CreateBrandBodySchema = BrandSchema.pick({
   logo: true
 }).strict()
 
-export const UpdateBrandBodySchema = CreateBrandBodySchema
+export const UpdateBrandBodySchema = CreateBrandBodySchema.partial()
 
 export type BrandType = z.infer<typeof BrandSchema>
 export type BrandIncludeTranslationType = z.infer<typeof BrandIncludeTranslationSchema>

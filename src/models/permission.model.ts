@@ -54,7 +54,7 @@ export const CreatePermissionBodySchema = PermissionSchema.pick({
   module: true
 }).strict()
 
-export const UpdatePermissionBodySchema = CreatePermissionBodySchema
+export const UpdatePermissionBodySchema = CreatePermissionBodySchema.partial()
 
 export type PermissionType = z.infer<typeof PermissionSchema>
 export type GetPermissionsResType = z.infer<typeof GetPermissionsResSchema>
