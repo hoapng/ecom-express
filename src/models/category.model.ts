@@ -15,7 +15,7 @@ export const CategorySchema = z.object({
   updatedAt: z.date()
 })
 
-const CategoryIncludeTranslationSchema = CategorySchema.extend({
+export const CategoryIncludeTranslationSchema = CategorySchema.extend({
   categoryTranslations: z.array(CategoryTranslationSchema)
 })
 

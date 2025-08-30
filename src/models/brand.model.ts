@@ -14,7 +14,7 @@ export const BrandSchema = z.object({
   updatedAt: z.date()
 })
 
-const BrandIncludeTranslationSchema = BrandSchema.extend({
+export const BrandIncludeTranslationSchema = BrandSchema.extend({
   brandTranslations: z.array(BrandTranslationSchema)
 })
 
