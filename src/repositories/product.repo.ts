@@ -1,5 +1,11 @@
 import { ALL_LANGUAGE_CODE } from '~/constants/other.constant'
-import { GetProductDetailResType, GetProductsQueryType, GetProductsResType, ProductType } from '~/models/product.model'
+import {
+  CreateProductBodyType,
+  GetProductDetailResType,
+  GetProductsQueryType,
+  GetProductsResType,
+  ProductType
+} from '~/models/product.model'
 import { prismaService, PrismaService } from '~/services/prisma.service'
 
 export class ProductRepo {
@@ -68,6 +74,55 @@ export class ProductRepo {
           include: {
             categoryTranslations: {
               where: languageId === ALL_LANGUAGE_CODE ? { deletedAt: null } : { languageId, deletedAt: null }
+            }
+          }
+        }
+      }
+    })
+  }
+
+  create({
+    createdById,
+    data
+  }: {
+    createdById: number
+    data: CreateProductBodyType
+  }): Promise<GetProductDetailResType> {
+    const { skus, categories, ...productData } = data
+    return this.prismaService.product.create({
+      data: {
+        createdById,
+        ...productData,
+        categories: {
+          connect: categories.map((category) => ({ id: category }))
+        },
+        skus: {
+          createMany: {
+            data: skus
+          }
+        }
+      },
+      include: {
+        productTranslations: {
+          where: { deletedAt: null }
+        },
+        skus: {
+          where: { deletedAt: null }
+        },
+        brand: {
+          include: {
+            brandTranslations: {
+              where: { deletedAt: null }
+            }
+          }
+        },
+        categories: {
+          where: {
+            deletedAt: null
+          },
+          include: {
+            categoryTranslations: {
+              where: { deletedAt: null }
             }
           }
         }
