@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { REQUEST_USER_KEY } from './constants/auth.constant'
 import { AccessTokenPayload } from './types/jwt.type'
+import { VariantsType } from './models/product.model'
 
 declare global {
   namespace Express {
@@ -11,6 +12,9 @@ declare global {
       files?: Express.Multer.File[] // For file uploads
       [key: string]: any // Allow additional properties
     }
+  }
+  namespace PrismaJson {
+    type Variants = VariantsType
   }
 }
 
