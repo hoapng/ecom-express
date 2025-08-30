@@ -31,7 +31,7 @@ model Language {
 
 model User {
   id          Int     @id @default(autoincrement())
-  email       String  
+  email       String
   name        String  @db.VarChar(500)
   password    String  @db.VarChar(500)
   phoneNumber String  @db.VarChar(50)
@@ -272,6 +272,8 @@ model ProductTranslation {
 model Category {
   id                   Int                   @id @default(autoincrement())
   products             Product[]
+  name                 String                @db.VarChar(500)
+  logo                 String?               @db.VarChar(1000)
   parentCategoryId     Int?
   parentCategory       Category?             @relation("ParentCategoryCategories", fields: [parentCategoryId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   childrenCategories   Category[]            @relation("ParentCategoryCategories")

@@ -19,6 +19,8 @@ import brandTranslationRouter from './routes/brand-translation.route'
 import brandRouter from './routes/brand.route'
 import i18n from 'i18n'
 import path from 'path'
+import categoryTranslationRouter from './routes/category-translation.route'
+import categoryRouter from './routes/category.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -55,6 +57,10 @@ app.use('/media', mediaRouter)
 app.use('/brand-translations', auth(), brandTranslationRouter)
 
 app.use('/brands', brandRouter)
+
+app.use('/category-translations', auth(), categoryTranslationRouter)
+
+app.use('/categories', auth(), categoryRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

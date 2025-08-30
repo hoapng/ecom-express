@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
-import { I18nTranslations } from '~/generated/i18n.generated'
 import {
   CreateBrandBodySchema,
   GetBrandDetailResSchema,
