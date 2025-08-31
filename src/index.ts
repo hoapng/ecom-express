@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express'
 import envConfig from './config/evnConfig'
 import authRouter from './routes/auth.route'
-import { bootstrap, initialScript } from './config/initialScript'
 import { logger } from './config/logger'
 import z from 'zod'
 import createHttpError from 'http-errors'
@@ -23,6 +22,8 @@ import categoryTranslationRouter from './routes/category-translation.route'
 import categoryRouter from './routes/category.route'
 import productTranslationRouter from './routes/product-translation.route'
 import productRouter from './routes/product.route'
+import { main } from './initialScript'
+import { bootstrap } from './initialScript/create-permissions'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -92,7 +93,7 @@ app.listen(PORT, () => {
 
 bootstrap(app)
 
-initialScript()
+main()
   .then(({ adminUser, createdRoleCount }) => {
     logger.info(`Created ${createdRoleCount} roles`)
     logger.info(`Created admin user: ${adminUser.email}`)

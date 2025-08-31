@@ -1,52 +1,9 @@
 import { HTTPMethodType, RoleName } from '~/constants/role.constant'
-import { hashingService } from '~/services/hashing.service'
 import { prismaService } from '~/services/prisma.service'
-import envConfig from './evnConfig'
 import expressListEndpoints from 'express-list-endpoints'
-import { logger } from './logger'
+import { logger } from '~/config/logger'
 
-export const initialScript = async () => {
-  const roleCount = await prismaService.role.count()
-  if (roleCount > 0) {
-    throw new Error('Database already')
-  }
-  const roles = await prismaService.role.createMany({
-    data: [
-      {
-        name: RoleName.Admin,
-        description: 'Admin role'
-      },
-      {
-        name: RoleName.Client,
-        description: 'Client role'
-      },
-      {
-        name: RoleName.Seller,
-        description: 'Seller role'
-      }
-    ]
-  })
-
-  const adminRole = await prismaService.role.findFirstOrThrow({
-    where: {
-      name: RoleName.Admin
-    }
-  })
-  const hashedPassword = await hashingService.hash(envConfig.ADMIN_PASSWORD)
-  const adminUser = await prismaService.user.create({
-    data: {
-      email: envConfig.ADMIN_EMAIL,
-      password: hashedPassword,
-      name: envConfig.ADMIN_NAME,
-      phoneNumber: envConfig.ADMIN_PHONE_NUMBER,
-      roleId: adminRole.id
-    }
-  })
-  return {
-    createdRoleCount: roles.count,
-    adminUser
-  }
-}
+const SellerModule = ['auth', 'media', 'products', 'product-translations', 'profile']
 
 export const bootstrap = async (app: Express.Application) => {
   const endpoints = expressListEndpoints(app)
@@ -109,7 +66,7 @@ export const bootstrap = async (app: Express.Application) => {
   const routesToAdd = availableRoutes.filter((item) => {
     return !permissionInDbMap[`${item.method}-${item.path}`]
   })
-
+  // Thêm routes mà không tồn tại trong permissionsInDb
   if (routesToAdd.length > 0) {
     const permissionsToAdd = await prismaService.permission.createMany({
       data: routesToAdd,
@@ -126,20 +83,29 @@ export const bootstrap = async (app: Express.Application) => {
       deletedAt: null
     }
   })
+
+  const adminPermissionIds = updatedPermissionsInDb.map((item) => ({ id: item.id }))
+  const sellerPermissionIds = updatedPermissionsInDb
+    .filter((item) => SellerModule.includes(item.module))
+    .map((item) => ({ id: item.id }))
+  await Promise.all([updateRole(adminPermissionIds, RoleName.Admin), updateRole(sellerPermissionIds, RoleName.Seller)])
+}
+
+const updateRole = async (permissionIds: { id: number }[], roleName: string) => {
   // Cập nhật lại các permissions trong Admin Role
-  const adminRole = await prismaService.role.findFirstOrThrow({
+  const role = await prismaService.role.findFirstOrThrow({
     where: {
-      name: RoleName.Admin,
+      name: roleName,
       deletedAt: null
     }
   })
   await prismaService.role.update({
     where: {
-      id: adminRole.id
+      id: role.id
     },
     data: {
       permissions: {
-        set: updatedPermissionsInDb.map((item) => ({ id: item.id }))
+        set: permissionIds
       }
     }
   })
