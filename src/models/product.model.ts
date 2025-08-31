@@ -151,7 +151,7 @@ export const CreateProductBodySchema = ProductSchema.pick({
     }
   })
 
-export const UpdateProductBodySchema = CreateProductBodySchema
+export const UpdateProductBodySchema = CreateProductBodySchema.partial()
 
 export type ProductType = z.infer<typeof ProductSchema>
 export type VariantsType = z.infer<typeof VariantsSchema>

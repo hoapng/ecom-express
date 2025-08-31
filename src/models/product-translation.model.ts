@@ -30,7 +30,7 @@ export const CreateProductTranslationBodySchema = ProductTranslationSchema.pick(
   languageId: true
 }).strict()
 
-export const UpdateProductTranslationBodySchema = CreateProductTranslationBodySchema
+export const UpdateProductTranslationBodySchema = CreateProductTranslationBodySchema.partial()
 
 export const DeleteProductTranslationParamsSchema = GetProductTranslationParamsSchema
 
