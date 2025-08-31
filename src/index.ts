@@ -24,6 +24,7 @@ import productTranslationRouter from './routes/product-translation.route'
 import productRouter from './routes/product.route'
 import { main } from './initialScript'
 import { bootstrap } from './initialScript/create-permissions'
+import manageProductRouter from './routes/manage-product.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -63,11 +64,13 @@ app.use('/brands', brandRouter)
 
 app.use('/category-translations', auth(), categoryTranslationRouter)
 
-app.use('/categories', auth(), categoryRouter)
+app.use('/categories', categoryRouter)
 
 app.use('/product-translations', auth(), productTranslationRouter)
 
-app.use('/products', auth(), productRouter)
+app.use('/products', productRouter)
+
+app.use('/manage-product/products', auth(), manageProductRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED
