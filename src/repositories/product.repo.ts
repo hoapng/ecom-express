@@ -154,11 +154,11 @@ export class ProductRepo {
     })
 
     // 2. Tìm các SKUs cần xóa (tồn tại trong DB nhưng không có trong data payload)
-    const skusToDelete = existingSKUs.filter((sku) => dataSkus.every((dataSku) => dataSku.value !== sku.value))
+    const skusToDelete = existingSKUs.filter((sku) => dataSkus?.every((dataSku) => dataSku.value !== sku.value))
     const skuIdsToDelete = skusToDelete.map((sku) => sku.id)
 
     // 3. Mapping ID vào trong data payload
-    const skusWithId = dataSkus.map((dataSku) => {
+    const skusWithId = dataSkus?.map((dataSku) => {
       const existingSku = existingSKUs.find((existingSKU) => existingSKU.value === dataSku.value)
       return {
         ...dataSku,
@@ -167,11 +167,11 @@ export class ProductRepo {
     })
 
     // 4. Tìm các skus để cập nhật
-    const skusToUpdate = skusWithId.filter((sku) => sku.id !== null)
+    const skusToUpdate = skusWithId?.filter((sku) => sku.id !== null)
 
     // 5. Tìm các skus để thêm mới
     const skusToCreate = skusWithId
-      .filter((sku) => sku.id === null)
+      ?.filter((sku) => sku.id === null)
       .map((sku) => {
         const { id: skuId, ...data } = sku
         return {
@@ -191,7 +191,7 @@ export class ProductRepo {
           ...productData,
           updatedById,
           categories: {
-            connect: categories.map((category) => ({ id: category }))
+            connect: categories?.map((category) => ({ id: category }))
           }
         }
       }),
@@ -208,7 +208,7 @@ export class ProductRepo {
         }
       }),
       // Cập nhật các SKU có trong data payload
-      ...skusToUpdate.map((sku) =>
+      ...(skusToUpdate?.map((sku) =>
         this.prismaService.sKU.update({
           where: {
             id: sku.id as number
@@ -221,10 +221,10 @@ export class ProductRepo {
             updatedById
           }
         })
-      ),
+      ) || []),
       // Thêm mới các SKU không có trong DB
       this.prismaService.sKU.createMany({
-        data: skusToCreate
+        data: skusToCreate || []
       })
     ])
 

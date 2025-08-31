@@ -6,6 +6,7 @@ import {
   GetProductParamsSchema,
   GetProductsQuerySchema,
   GetProductsResSchema,
+  ProductSchema,
   UpdateProductBodySchema
 } from '~/models/product.model'
 import { MessageResSchema } from '~/models/response.model'
@@ -56,7 +57,7 @@ export class ProductController {
       id: params.productId,
       updatedById: userId
     })
-    req.data = GetProductDetailResSchema.parse(data)
+    req.data = ProductSchema.parse(data)
     return next()
   }
 
