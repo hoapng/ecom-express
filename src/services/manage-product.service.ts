@@ -43,7 +43,12 @@ export class ManageProductService {
       limit: props.query.limit,
       languageId: lang,
       createdById: props.query.createdById,
-      isPublic: props.query.isPublic
+      isPublic: props.query.isPublic,
+      brandIds: props.query.brandIds,
+      minPrice: props.query.minPrice,
+      maxPrice: props.query.maxPrice,
+      categories: props.query.categories,
+      name: props.query.name
     })
     return data
   }
