@@ -42,7 +42,8 @@ export class ManageProductService {
       page: props.query.page,
       limit: props.query.limit,
       languageId: lang,
-      createdById: props.query.createdById
+      createdById: props.query.createdById,
+      isPublic: props.query.isPublic
     })
     return data
   }
