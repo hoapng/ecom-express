@@ -1,10 +1,14 @@
 import { NextFunction, Request, Response } from 'express'
 import { REQUEST_USER_KEY } from '~/constants/auth.constant'
 import {
+  CancelOrderBodySchema,
+  CancelOrderResSchema,
   CreateOrderBodySchema,
   CreateOrderResSchema,
+  GetOrderDetailResSchema,
   GetOrderListQuerySchema,
-  GetOrderListResSchema
+  GetOrderListResSchema,
+  GetOrderParamsSchema
 } from '~/models/order.model'
 import { orderService, OrderService } from '~/services/order.service'
 
@@ -24,6 +28,23 @@ export class OrderController {
     const userId = req[REQUEST_USER_KEY]?.userId as number
     const data = await this.orderService.create(userId, body)
     req.data = CreateOrderResSchema.parse(data)
+    return next()
+  }
+
+  async detail(req: Request, res: Response, next: NextFunction) {
+    const params = GetOrderParamsSchema.parse(req.params)
+    const userId = req[REQUEST_USER_KEY]?.userId as number
+    const data = await this.orderService.detail(userId, params.orderId)
+    req.data = GetOrderDetailResSchema.parse(data)
+    return next()
+  }
+
+  async cancel(req: Request, res: Response, next: NextFunction) {
+    const params = GetOrderParamsSchema.parse(req.params)
+    const _ = CancelOrderBodySchema.parse(req.body)
+    const userId = req[REQUEST_USER_KEY]?.userId as number
+    const data = await this.orderService.cancel(userId, params.orderId)
+    req.data = CancelOrderResSchema.parse(data)
     return next()
   }
 }

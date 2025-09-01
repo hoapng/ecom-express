@@ -94,6 +94,7 @@ export const CreateOrderBodySchema = z
 
 export const CreateOrderResSchema = z.object({ data: z.array(OrderSchema) })
 
+export const CancelOrderBodySchema = z.object({})
 export const CancelOrderResSchema = OrderSchema
 
 export const GetOrderParamsSchema = z

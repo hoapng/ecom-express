@@ -5,3 +5,4 @@ export const ProductNotFoundException = createHttpError.NotFound('Error.ProductN
 export const OutOfStockSKUException = createHttpError.BadRequest('Error.OutOfStockSKU')
 export const NotFoundCartItemException = createHttpError.NotFound('Error.NotFoundCartItem')
 export const SKUNotBelongToShopException = createHttpError.BadRequest('Error.SKUNotBelongToShop')
+export const CannotCancelOrderException = createHttpError.BadRequest('Error.CannotCancelOrder')

@@ -11,6 +11,14 @@ export class OrderService {
   async create(userId: number, body: CreateOrderBodyType) {
     return this.orderRepo.create(userId, body)
   }
+
+  cancel(userId: number, orderId: number) {
+    return this.orderRepo.cancel(userId, orderId)
+  }
+
+  detail(userId: number, orderId: number) {
+    return this.orderRepo.detail(userId, orderId)
+  }
 }
 
 export const orderService = new OrderService(orderRepo)

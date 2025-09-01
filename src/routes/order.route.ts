@@ -14,4 +14,14 @@ orderRouter.post(
   wrapRequestHandler((req, res, next) => orderController.create(req, res, next))
 )
 
+orderRouter.get(
+  '/:orderId',
+  wrapRequestHandler((req, res, next) => orderController.detail(req, res, next))
+)
+
+orderRouter.put(
+  '/:orderId',
+  wrapRequestHandler((req, res, next) => orderController.cancel(req, res, next))
+)
+
 export default orderRouter

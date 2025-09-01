@@ -1,18 +1,23 @@
 import { Prisma } from '@prisma/client'
 import { OrderStatus } from '~/constants/order.constant'
 import {
+  CannotCancelOrderException,
   NotFoundCartItemException,
+  OrderNotFoundException,
   OutOfStockSKUException,
   ProductNotFoundException,
   SKUNotBelongToShopException
 } from '~/errors/order.error'
 import {
+  CancelOrderResType,
   CreateOrderBodyType,
   CreateOrderResType,
+  GetOrderDetailResType,
   GetOrderListQueryType,
   GetOrderListResType
 } from '~/models/order.model'
 import { prismaService, PrismaService } from '~/services/prisma.service'
+import { isNotFoundPrismaError } from '~/utils/helper'
 
 export class OrderRepo {
   constructor(private readonly prismaService: PrismaService) {}
@@ -176,6 +181,55 @@ export class OrderRepo {
     })
     return {
       data: orders
+    }
+  }
+
+  async detail(userId: number, orderid: number): Promise<GetOrderDetailResType> {
+    const order = await this.prismaService.order.findUnique({
+      where: {
+        id: orderid,
+        userId,
+        deletedAt: null
+      },
+      include: {
+        items: true
+      }
+    })
+    if (!order) {
+      throw OrderNotFoundException
+    }
+    return order
+  }
+
+  async cancel(userId: number, orderId: number): Promise<CancelOrderResType> {
+    try {
+      const order = await this.prismaService.order.findUniqueOrThrow({
+        where: {
+          id: orderId,
+          userId,
+          deletedAt: null
+        }
+      })
+      if (order.status !== OrderStatus.PENDING_PAYMENT) {
+        throw CannotCancelOrderException
+      }
+      const updatedOrder = await this.prismaService.order.update({
+        where: {
+          id: orderId,
+          userId,
+          deletedAt: null
+        },
+        data: {
+          status: OrderStatus.CANCELLED,
+          updatedById: userId
+        }
+      })
+      return updatedOrder
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw OrderNotFoundException
+      }
+      throw error
     }
   }
 }
