@@ -3,9 +3,9 @@ import { prismaService } from '~/services/prisma.service'
 import expressListEndpoints from 'express-list-endpoints'
 import { logger } from '~/config/logger'
 
-const SellerModule = ['auth', 'media', 'products', 'product-translations', 'profile']
+const SellerModule = ['auth', 'media', 'products', 'product-translations', 'profile', 'orders']
 
-const ClientModule = ['auth', 'media', 'profile', 'cart']
+const ClientModule = ['auth', 'media', 'profile', 'cart', 'orders']
 
 export const bootstrap = async (app: Express.Application) => {
   const endpoints = expressListEndpoints(app)
@@ -90,7 +90,14 @@ export const bootstrap = async (app: Express.Application) => {
   const sellerPermissionIds = updatedPermissionsInDb
     .filter((item) => SellerModule.includes(item.module))
     .map((item) => ({ id: item.id }))
-  await Promise.all([updateRole(adminPermissionIds, RoleName.Admin), updateRole(sellerPermissionIds, RoleName.Seller)])
+  const clientPermissionIds = updatedPermissionsInDb
+    .filter((item) => ClientModule.includes(item.module))
+    .map((item) => ({ id: item.id }))
+  await Promise.all([
+    updateRole(adminPermissionIds, RoleName.Admin),
+    updateRole(sellerPermissionIds, RoleName.Seller),
+    updateRole(clientPermissionIds, RoleName.Client)
+  ])
 }
 
 const updateRole = async (permissionIds: { id: number }[], roleName: string) => {
