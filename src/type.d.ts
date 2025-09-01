@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { REQUEST_USER_KEY } from './constants/auth.constant'
 import { AccessTokenPayload } from './types/jwt.type'
 import { VariantsType } from './models/product.model'
+import { ProductTranslationType } from './models/product-translation.model'
 
 declare global {
   namespace Express {
@@ -15,6 +16,12 @@ declare global {
   }
   namespace PrismaJson {
     type Variants = VariantsType
+    type ProductTranslations = Pick<ProductTranslationType, 'id' | 'name' | 'description' | 'languageId'>[]
+    type Receiver = {
+      name: string
+      phone: string
+      address: string
+    }
   }
 }
 
