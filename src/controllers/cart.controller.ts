@@ -4,6 +4,7 @@ import {
   AddToCartBodySchema,
   CartItemSchema,
   DeleteCartBodySchema,
+  GetCartItemParamsSchema,
   GetCartResSchema,
   UpdateCartItemBodySchema
 } from '~/models/cart.model'
@@ -31,11 +32,16 @@ export class CartController {
     return next()
   }
 
-  async updateCart(req: Request, res: Response, next: NextFunction) {
+  async updateCartItem(req: Request, res: Response, next: NextFunction) {
+    const params = GetCartItemParamsSchema.parse(req.params)
     const body = UpdateCartItemBodySchema.parse(req.body)
     const userId = req[REQUEST_USER_KEY]?.userId as number
-    const data = await this.cartService.updateCartItem(userId, body)
-    req.data = GetCartResSchema.parse(data)
+    const data = await this.cartService.updateCartItem({
+      userId,
+      body,
+      cartItemId: params.cartItemId
+    })
+    req.data = CartItemSchema.parse(data)
     return next()
   }
 

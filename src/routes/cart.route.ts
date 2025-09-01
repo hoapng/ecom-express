@@ -17,7 +17,7 @@ cartRouter.post(
 
 cartRouter.put(
   '/:cartItemId',
-  wrapRequestHandler((req, res, next) => cartController.updateCart(req, res, next))
+  wrapRequestHandler((req, res, next) => cartController.updateCartItem(req, res, next))
 )
 
 cartRouter.delete(
