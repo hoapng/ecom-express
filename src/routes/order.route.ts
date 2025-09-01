@@ -9,4 +9,9 @@ orderRouter.get(
   wrapRequestHandler((req, res, next) => orderController.getCart(req, res, next))
 )
 
+orderRouter.post(
+  '/',
+  wrapRequestHandler((req, res, next) => orderController.create(req, res, next))
+)
+
 export default orderRouter

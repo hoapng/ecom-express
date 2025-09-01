@@ -1,4 +1,4 @@
-import { GetOrderListQueryType } from '~/models/order.model'
+import { CreateOrderBodyType, GetOrderListQueryType } from '~/models/order.model'
 import { orderRepo, OrderRepo } from '~/repositories/order.repo'
 
 export class OrderService {
@@ -6,6 +6,10 @@ export class OrderService {
 
   async list(userId: number, query: GetOrderListQueryType) {
     return this.orderRepo.list(userId, query)
+  }
+
+  async create(userId: number, body: CreateOrderBodyType) {
+    return this.orderRepo.create(userId, body)
   }
 }
 
