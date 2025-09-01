@@ -5,6 +5,8 @@ import { logger } from '~/config/logger'
 
 const SellerModule = ['auth', 'media', 'products', 'product-translations', 'profile']
 
+const ClientModule = ['auth', 'media', 'profile', 'cart']
+
 export const bootstrap = async (app: Express.Application) => {
   const endpoints = expressListEndpoints(app)
 

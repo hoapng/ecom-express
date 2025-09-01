@@ -48,6 +48,9 @@ export class AccessTokenGuard {
         request.baseUrl.slice(1).replace(/-([a-z])/g, (match, letter) => letter.toUpperCase())
       )
       path = path.replace(`/${lastSegment}`, `/:${module}Id`)
+      if (['cart'].includes(module)) {
+        path = path.replace(`/${lastSegment}`, `/:${module}ItemId`)
+      }
     }
 
     const roleId: number = decodedAccessToken.roleId

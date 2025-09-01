@@ -25,6 +25,7 @@ import productRouter from './routes/product.route'
 import { main } from './initialScript'
 import { bootstrap } from './initialScript/create-permissions'
 import manageProductRouter from './routes/manage-product.route'
+import cartRouter from './routes/cart.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -71,6 +72,8 @@ app.use('/product-translations', auth(), productTranslationRouter)
 app.use('/products', productRouter)
 
 app.use('/manage-product/products', auth(), manageProductRouter)
+
+app.use('/cart', auth(), cartRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED
