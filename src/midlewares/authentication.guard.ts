@@ -9,9 +9,8 @@ import {
   ConditionGuardType,
   REQUEST_USER_KEY
 } from '~/constants/auth.constant'
-import { tokenService, TokenService } from '~/services/token.service'
 import { accessTokenGuard, AccessTokenGuard } from './access-token.guard'
-import { apiKeyGuard, APIKeyGuard } from './api-key.guard'
+import { paymentApiKeyGuard, PaymentAPIKeyGuard } from './payment-api-key.guard'
 
 export interface CanActivate {
   canActivate(req: Request, res: Response, next: NextFunction): Promise<boolean>
@@ -21,11 +20,11 @@ export class AuthenticationGuard {
   private readonly authTypeGuardMap: Record<AuthTypeType, CanActivate>
   constructor(
     private readonly accessTokenGuard: AccessTokenGuard,
-    private readonly apiKeyGuard: APIKeyGuard
+    private readonly paymentApiKeyGuard: PaymentAPIKeyGuard
   ) {
     this.authTypeGuardMap = {
       [AuthType.Bearer]: this.accessTokenGuard,
-      [AuthType.APIKey]: this.apiKeyGuard,
+      [AuthType.PaymentAPIKey]: this.paymentApiKeyGuard,
       [AuthType.None]: { canActivate: () => Promise.resolve(true) }
     }
   }
@@ -101,6 +100,6 @@ export class AuthenticationGuard {
   }
 }
 
-export const authenticationGuard = new AuthenticationGuard(accessTokenGuard, apiKeyGuard)
+export const authenticationGuard = new AuthenticationGuard(accessTokenGuard, paymentApiKeyGuard)
 
 export const auth = authenticationGuard.auth.bind(authenticationGuard)
