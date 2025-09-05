@@ -27,6 +27,7 @@ import { bootstrap } from './initialScript/create-permissions'
 import manageProductRouter from './routes/manage-product.route'
 import cartRouter from './routes/cart.route'
 import orderRouter from './routes/order.route'
+import paymentRouter from './routes/payment.route'
 
 const app = express()
 const PORT = envConfig.PORT || 8080
@@ -77,6 +78,8 @@ app.use('/manage-product/products', auth(), manageProductRouter)
 app.use('/cart', auth(), cartRouter)
 
 app.use('/orders', auth(), orderRouter)
+
+app.use('/payment', auth(), paymentRouter)
 
 app.use((req: any, res: Response, next: NextFunction) => {
   const statusCode = +req.statusCode || StatusCodes.CREATED

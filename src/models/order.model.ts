@@ -103,6 +103,10 @@ export const GetOrderParamsSchema = z
   })
   .strict()
 
+export const OrderIncludeProductSKUSnapshotSchema = OrderSchema.extend({
+  items: z.array(ProductSKUSnapshotSchema)
+})
+
 export type GetOrderListResType = z.infer<typeof GetOrderListResSchema>
 export type GetOrderListQueryType = z.infer<typeof GetOrderListQuerySchema>
 export type GetOrderDetailResType = z.infer<typeof GetOrderDetailResSchema>
@@ -111,3 +115,4 @@ export type CreateOrderBodyType = z.infer<typeof CreateOrderBodySchema>
 export type CreateOrderResType = z.infer<typeof CreateOrderResSchema>
 export type CancelOrderResType = z.infer<typeof CancelOrderResSchema>
 export type OrderType = z.infer<typeof OrderSchema>
+export type OrderIncludeProductSKUSnapshotType = z.infer<typeof OrderIncludeProductSKUSnapshotSchema>
