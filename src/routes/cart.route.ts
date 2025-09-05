@@ -20,7 +20,7 @@ cartRouter.put(
   wrapRequestHandler((req, res, next) => cartController.updateCartItem(req, res, next))
 )
 
-cartRouter.delete(
+cartRouter.post(
   '/delete',
   wrapRequestHandler((req, res, next) => cartController.deleteCart(req, res, next))
 )
